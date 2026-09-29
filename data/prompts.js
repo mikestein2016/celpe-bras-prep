@@ -32,28 +32,30 @@ CB.prompts.push(
     ]
   },
   {
-    id: "b-lixo-eletronico",
+    id: "b-onda-calor",
     label: "B",
-    title: "Lixo eletrônico no condomínio",
+    title: "Onda de calor no trabalho",
     genre: "aviso",
     task: 3,
     minutes: 45,
     source: {
       kind: "texto",
-      title: "O que fazer com o celular velho?",
+      title: "Onda de calor: como se proteger",
       body: [
-        "O Brasil está entre os maiores produtores de lixo eletrônico do mundo, e só uma pequena parte desse material é reciclada. Celulares, pilhas, baterias e computadores contêm metais como chumbo e mercúrio, que podem contaminar o solo e a água quando vão para o lixo comum. Esses aparelhos também têm materiais valiosos, como cobre e ouro, que podem ser reaproveitados.",
-        "Pela lei brasileira, fabricantes e lojas devem receber de volta os produtos usados, no sistema chamado logística reversa. Muitas lojas de eletrônicos e supermercados têm pontos de coleta. Antes de descartar um celular ou computador, é importante apagar os dados pessoais."
+        "As ondas de calor, períodos de vários dias seguidos com temperaturas bem acima da média, estão ficando mais frequentes no Brasil. Elas afetam todo mundo, mas o risco é maior para idosos, crianças, pessoas com doenças crônicas e para quem trabalha ao ar livre.",
+        "Médicos recomendam beber água ao longo do dia, mesmo sem sede, e evitar bebidas alcoólicas. Também é importante usar roupas leves e claras, passar protetor solar e, sempre que possível, evitar a exposição ao sol entre as 10h e as 16h, quando o calor é mais forte.",
+        "O corpo dá sinais quando não está suportando o calor: dor de cabeça, tontura, náusea, cansaço excessivo e pele muito quente e vermelha. Nesses casos, a pessoa deve ir imediatamente para um lugar fresco e à sombra, tomar água aos poucos e molhar o rosto e o pescoço. Se os sintomas não melhorarem ou se houver confusão mental ou desmaio, é preciso procurar atendimento médico com urgência.",
+        "Especialistas lembram ainda que empresas e escolas podem ajudar ajustando horários, oferecendo água e criando pausas para descanso em locais frescos."
       ]
     },
-    prompt: "Você faz parte da comissão ambiental do seu condomínio. Alguns moradores estão jogando pilhas e aparelhos velhos no lixo comum. Escreva um aviso para o mural do condomínio explicando por que isso é um problema e orientando os moradores sobre o que fazer.",
+    prompt: "Você trabalha no setor de Recursos Humanos da Transportes Rota Leste, uma empresa de entregas. A previsão indica uma onda de calor nas próximas duas semanas. Para proteger os funcionários, a empresa vai instalar bebedouros extras no galpão e antecipar o início das entregas externas para as 6h. Escreva um comunicado aos funcionários informando essas medidas, orientando-os sobre como se proteger do calor e explicando o que fazer se eles ou um colega passarem mal.",
     checklist: [
-      "Aviso format with a short headline that names the topic (*Atenção: descarte de pilhas e eletrônicos*), a greeting to residents (*Prezados moradores*) and a signature by role (*Comissão Ambiental*).",
-      "Names the problem in the building: some residents are throwing batteries and old devices into the regular trash.",
-      "Explains why it matters, in new words: metals such as lead and mercury contaminate soil and water, and valuable materials such as copper and gold could be reused.",
-      "Tells residents what to do: take items to collection points in electronics stores and supermarkets, which must accept them back (*logística reversa*), and erase personal data first. Adding a building collection box is a good touch.",
-      "Gives instructions in a consistent form, all imperatives (*Leve*, *Não jogue*) or all infinitives (*Levar*, *Não jogar*).",
-      "Neutral to formal register, short and scannable for a notice board; no reference to a text the residents never read."
+      "Comunicado format: a title, the audience (*Prezados colaboradores* or *A todos os funcionários*), short paragraphs, and a signature by the department (*Setor de Recursos Humanos*), not a personal name.",
+      "Written by HR to all employees, with a formal but clear tone; opens by stating the reason (the heat wave forecast for the next two weeks).",
+      "Informs the company's measures: extra water fountains in the warehouse and outdoor deliveries starting at 6 a.m.",
+      "Gives protection guidance with source facts in new words: drink water all day even without thirst, avoid alcohol, light clothes, sunscreen, and less sun between 10 a.m. and 4 p.m.; notes that outdoor workers are at higher risk.",
+      "Explains what to do if someone feels ill: the warning signs (headache, dizziness, nausea, very hot red skin), move to a cool shaded place, sip water, wet face and neck, and seek urgent care if it does not improve or there is confusion or fainting; says whom to tell at the company.",
+      "Plural instructions in the subjunctive form or *solicitamos que* + subjunctive (*bebam*, *evitem*, *procurem*); *há*, not *tem*; no *segundo o texto*."
     ]
   },
   {
