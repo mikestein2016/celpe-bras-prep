@@ -7,6 +7,7 @@
   var PROMPTS = CB.prompts || [];
   var DRILLS = CB.drills || [];
   var OV = CB.overview || {};
+  var MODELS = CB.models || {};
 
   var CATS = {
     genero: { label: 'Gênero textual', en: 'genre markers and format' },
@@ -173,14 +174,21 @@
     out += '<div class="enunciado"><b>Enunciado</b>' + md(s.prompt) + '</div>';
     out += sourceBlock(s.source);
     out += '<h3>Model answer' + (s.wordCount ? ' <span class="chip">' + s.wordCount + ' palavras</span>' : '') + '</h3>';
-    out += '<div class="legend">' + Object.keys(CATS).filter(function (c) { return used[c]; }).map(function (c) {
+    out += modelBlock(s);
+    return out;
+  }
+
+  function modelBlock(s) {
+    var catOf = {}; (s.notes || []).forEach(function (n) { catOf[n.n] = n.cat; });
+    var used = {}; (s.notes || []).forEach(function (n) { used[n.cat] = 1; });
+    var out = '<div class="legend">' + Object.keys(CATS).filter(function (c) { return used[c]; }).map(function (c) {
       return '<span class="cat-' + c + '">' + esc(CATS[c].label) + ': ' + esc(CATS[c].en) + '</span>';
     }).join('') + '</div>';
     out += '<div class="paper">' + (s.answer || []).map(function (p) {
       return '<p' + (p.length < 60 ? ' class="line"' : '') + '>' + marked(p, catOf) + '</p>';
     }).join('') + '</div>';
     out += '<h3>Why each highlight scores</h3><ol class="notes">' + (s.notes || []).map(function (n) {
-      return '<li class="cat-' + n.cat + '" id="note-' + n.n + '"><span class="note-n">' + n.n + '</span><div><div class="note-cat">' + esc((CATS[n.cat] || {}).label || n.cat) + '</div>' + md(n.text) + '</div></li>';
+      return '<li class="cat-' + n.cat + '"><span class="note-n">' + n.n + '</span><div><div class="note-cat">' + esc((CATS[n.cat] || {}).label || n.cat) + '</div>' + md(n.text) + '</div></li>';
     }).join('') + '</ol>';
     if (s.why5) out += '<div class="why5"><b>Why this earns a 5</b><p style="margin:.3em 0 0">' + md(s.why5) + '</p></div>';
     return out;
@@ -231,7 +239,7 @@
   /* ---------- practice ---------- */
   function promptTile(p) {
     var g = GENRE[p.genre];
-    return '<a class="tile" href="#/pratica/' + p.id + '"><div class="tile-title">' + esc(p.label) + '. ' + esc(p.title) + '</div><div class="tile-meta"><span class="chip accent">' + (g ? esc(g.name) : esc(p.genre)) + '</span><span class="chip">' + p.minutes + ' min</span>' + (st.done[p.id] ? '<span class="chip done">feita ✓</span>' : '') + '</div></a>';
+    return '<a class="tile" href="#/pratica/' + p.id + '"><div class="tile-title">' + esc(p.label) + '. ' + esc(p.title) + '</div><div class="tile-meta"><span class="chip accent">' + (g ? esc(g.name) : esc(p.genre)) + '</span><span class="chip">' + p.minutes + ' min</span>' + (st.done[p.id] ? '<span class="chip done">feita ✓</span>' : '') + (MODELS[p.id] ? '<span class="chip">modelo</span>' : '') + '</div></a>';
   }
   function viewPracticeList() {
     var out = '<div class="eyebrow">Prática</div><h1>Practice prompts</h1><p class="lede">Write by hand in pen, with the timer, and do both proofreading passes. Then send a photo of the page to Claude for a score and corrections.</p>';
@@ -250,6 +258,8 @@
     out += '<div class="enunciado"><b>Enunciado</b>' + md(p.prompt) + '</div>';
     out += sourceBlock(p.source);
     out += '<details class="reveal"><summary>After writing: what the grader expects</summary>' + list(p.checklist, 'checklist') + '</details>';
+    var mdl = MODELS[p.id];
+    if (mdl) out += '<details class="reveal model"><summary>After writing: model answer' + (mdl.wordCount ? ' <span class="chip">' + mdl.wordCount + ' palavras</span>' : '') + '</summary><p class="muted small">Tap any highlight to see why it earns points. Compare it with yours: the role, each checklist item, the source facts you used, and the two proofreading passes.</p>' + modelBlock(mdl) + '</details>';
     out += '<div class="btn-row"><button class="btn ' + (st.done[p.id] ? '' : 'primary') + '" id="p-done">' + (st.done[p.id] ? 'Feita ✓ (desmarcar)' : 'Marcar como feita') + '</button>' +
       (g ? '<a class="btn ghost" href="#/guia/' + g.id + '">Guia: ' + esc(g.name) + '</a>' : '') + '</div>';
     out += pager(PROMPTS, p, 'pratica');
@@ -280,6 +290,7 @@
       if (st.done[p.id]) delete st.done[p.id]; else st.done[p.id] = new Date().toISOString();
       save(); route();
     };
+    bindSample(MODELS[p.id]);
     cleanup = function () { clearInterval(iv); };
   }
 

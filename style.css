@@ -323,3 +323,5 @@ table.bands tr.target td { background: var(--yellow-soft); }
 .blank { color: var(--blue); }
 .timer-digits { color: var(--blue); }
 .sk-ex { border-left-color: var(--green); }
+.reveal.model summary { color: var(--blue); }
+.reveal.model[open] summary { margin-bottom: 10px; }

@@ -123,3 +123,20 @@ Choice modes (tap one option):
 - `prompt` has exactly one `___`.
 - `rule` is shown after answering: one short EN line naming the rule, not just the answer.
 - `tag` optional group label (e.g. `-ção`, `-ma`, `crase`, `infinitivo pessoal`).
+
+## CB.models — model answers for the practice prompts
+
+One file per batch (`data/models-1.js`, `models-2.js`, `models-3.js`), keyed by prompt id:
+
+```js
+window.CB = window.CB || {};
+CB.models = CB.models || {};
+CB.models['a-brecho'] = {
+  answer: ['PT line with {{n|highlight}} markers', ...],   // same rules as a genre sample answer
+  notes: [ { n: 1, cat: 'genero', text: 'EN why this earns points' }, ... ],   // 8–12 notes, all six categories
+  why5: 'EN paragraph: why this earns a 5',
+  wordCount: 185
+};
+```
+
+The model answer must satisfy every item in that prompt's `checklist`, use the source facts reworded (never copied, never "segundo o texto" unless the genre is resumo or carta do leitor naming the report), and follow the genre's conventions as described in that genre's guide in `data/genres-a.js` / `data/genres-b.js`.
