@@ -1,59 +1,39 @@
+/* Light theme only, in the colors of the Brazilian flag */
 :root {
-  --bg: #f7f5f0;
+  color-scheme: light;
+  --bg: #ffffff;
   --surface: #ffffff;
-  --surface-2: #f0ede6;
-  --ink: #1d2320;
-  --ink-2: #4a534f;
-  --ink-3: #78807c;
-  --line: #e2ddd3;
-  --accent: #1f6f5c;
+  --surface-2: #f2f6f3;
+  --ink: #0f1c2e;
+  --ink-2: #3b4a5c;
+  --ink-3: #687586;
+  --line: #e2e8ee;
+  --green: #009c3b;
+  --green-dark: #00762c;
+  --yellow: #ffdf00;
+  --yellow-soft: #fff7c2;
+  --blue: #002776;
+  --blue-soft: #e6ecf8;
+  --accent: var(--green-dark);
   --accent-ink: #ffffff;
-  --accent-soft: #dcefe8;
-  --good: #1f7a4a;
-  --good-soft: #dff3e7;
-  --bad: #b3362d;
-  --bad-soft: #fbe3e0;
-  --paper: #fffdf7;
-  --paper-line: #e6eef8;
-  --c-genero: #2f6fd1;   --c-genero-bg: #e1ecfb;
-  --c-papel: #7a4cc2;    --c-papel-bg: #eee5fa;
-  --c-fonte: #1f7a4a;    --c-fonte-bg: #dff3e7;
-  --c-coesao: #b86a00;   --c-coesao-bg: #fdeed6;
-  --c-registro: #c0336f; --c-registro-bg: #fbe3ee;
-  --c-lingua: #0f7f8c;   --c-lingua-bg: #dcf2f4;
+  --accent-soft: #e2f4e8;
+  --good: #00762c;
+  --good-soft: #e2f4e8;
+  --bad: #c0392b;
+  --bad-soft: #fde8e5;
+  --paper: #fffef6;
+  --paper-line: #e3eaf6;
+  --c-genero: #1f4fb8;   --c-genero-bg: #e3ebfb;
+  --c-papel: #7a4cc2;    --c-papel-bg: #efe7fb;
+  --c-fonte: #00762c;    --c-fonte-bg: #e2f4e8;
+  --c-coesao: #9a6a00;   --c-coesao-bg: #fff4bf;
+  --c-registro: #c0336f; --c-registro-bg: #fce6ef;
+  --c-lingua: #0f7f8c;   --c-lingua-bg: #ddf2f4;
   --radius: 14px;
-  --shadow: 0 1px 2px rgba(0,0,0,.05), 0 4px 16px rgba(0,0,0,.05);
+  --shadow: 0 1px 2px rgba(0,39,118,.05), 0 4px 16px rgba(0,39,118,.06);
   --font-head: 'Plus Jakarta Sans', system-ui, sans-serif;
   --font-body: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
   --font-pt: 'Source Serif 4', Georgia, serif;
-}
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    --bg: #141816; --surface: #1c211f; --surface-2: #232927; --ink: #e8ece9; --ink-2: #b6bfba; --ink-3: #87908b;
-    --line: #2f3633; --accent: #4fb89a; --accent-ink: #0d1412; --accent-soft: #1d3a32;
-    --good: #5cc98e; --good-soft: #173526; --bad: #f07a6f; --bad-soft: #3d1f1c;
-    --paper: #1f2422; --paper-line: #2a3340;
-    --c-genero: #7fb0ff;   --c-genero-bg: #1c2b44;
-    --c-papel: #bf9bf5;    --c-papel-bg: #2c2240;
-    --c-fonte: #6fd39a;    --c-fonte-bg: #16321f;
-    --c-coesao: #f2b55a;   --c-coesao-bg: #3a2a12;
-    --c-registro: #f58bb8; --c-registro-bg: #3d1a2b;
-    --c-lingua: #5fd0dc;   --c-lingua-bg: #123438;
-    --shadow: none;
-  }
-}
-:root[data-theme="dark"] {
-  --bg: #141816; --surface: #1c211f; --surface-2: #232927; --ink: #e8ece9; --ink-2: #b6bfba; --ink-3: #87908b;
-  --line: #2f3633; --accent: #4fb89a; --accent-ink: #0d1412; --accent-soft: #1d3a32;
-  --good: #5cc98e; --good-soft: #173526; --bad: #f07a6f; --bad-soft: #3d1f1c;
-  --paper: #1f2422; --paper-line: #2a3340;
-  --c-genero: #7fb0ff;   --c-genero-bg: #1c2b44;
-  --c-papel: #bf9bf5;    --c-papel-bg: #2c2240;
-  --c-fonte: #6fd39a;    --c-fonte-bg: #16321f;
-  --c-coesao: #f2b55a;   --c-coesao-bg: #3a2a12;
-  --c-registro: #f58bb8; --c-registro-bg: #3d1a2b;
-  --c-lingua: #5fd0dc;   --c-lingua-bg: #123438;
-  --shadow: none;
 }
 
 * { box-sizing: border-box; }
@@ -105,7 +85,7 @@ main { max-width: 760px; margin: 0 auto; padding: 20px 16px 96px; }
   padding: 16px 18px; box-shadow: var(--shadow); margin: 0 0 12px;
 }
 .card h3:first-child, .card h2:first-child { margin-top: 0; }
-.grid { display: grid; gap: 12px; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); }
+.grid { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); }
 a.tile {
   display: block; text-decoration: none; color: var(--ink);
   background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius);
@@ -307,3 +287,39 @@ a.mode.mix { border: 2px solid var(--accent); }
 .muted { color: var(--ink-3); }
 .small { font-size: .9rem; }
 .empty { color: var(--ink-3); font-style: italic; }
+
+/* Brazil accents */
+h1 { color: var(--blue); }
+h2, h3 { color: var(--blue); }
+.eyebrow { color: var(--green-dark); }
+a { color: var(--blue); }
+.topbar { background: rgba(255,255,255,.94); border-bottom: 0; }
+.topbar::after { content: ''; position: absolute; left: 0; right: 0; bottom: -4px; height: 4px;
+  background: linear-gradient(90deg, var(--green) 0 45%, var(--yellow) 45% 70%, var(--blue) 70% 100%); }
+.tb-title { color: var(--blue); }
+.tb-title span { color: var(--green-dark); }
+.tb-nav a { color: var(--ink-2); }
+.tb-nav a.on { background: var(--yellow); color: var(--blue); }
+.countdown b { color: var(--blue); box-shadow: inset 0 -.28em 0 var(--yellow); padding: 0 .08em; }
+a.tile:hover { border-color: var(--blue); }
+.hero-tiles a.tile { border-left: 6px solid var(--green); }
+.hero-tiles a.tile:nth-child(2) { border-left-color: var(--yellow); }
+.hero-tiles a.tile:nth-child(3) { border-left-color: var(--blue); }
+.chip.accent { background: var(--blue-soft); color: var(--blue); }
+.enunciado { background: var(--yellow-soft); border-left: 5px solid var(--yellow); }
+.enunciado b { color: var(--blue); }
+.skeleton li::before { background: var(--yellow); color: var(--blue); }
+.checklist li::before { color: var(--green); }
+.btn.primary { background: var(--green-dark); border-color: var(--green-dark); }
+a.mode.mix { border-color: var(--yellow); box-shadow: 0 0 0 1px var(--yellow), var(--shadow); }
+.mode-stat { color: var(--blue); }
+.acc-bar i, .progress i { background: var(--green); }
+.stat b, .score-big { color: var(--blue); }
+table.bands tr.target td { background: var(--yellow-soft); }
+.tray button { border-color: var(--blue); background: var(--blue-soft); color: var(--blue); }
+.tray button.cur { background: var(--blue); color: #fff; }
+.tl.sel { border-color: var(--blue); box-shadow: 0 0 0 3px var(--yellow); }
+.tl.changed { color: var(--blue); }
+.blank { color: var(--blue); }
+.timer-digits { color: var(--blue); }
+.sk-ex { border-left-color: var(--green); }
