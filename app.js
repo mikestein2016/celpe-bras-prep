@@ -8,6 +8,7 @@
   var DRILLS = CB.drills || [];
   var OV = CB.overview || {};
   var MODELS = CB.models || {};
+  var OPEN = CB.openings || null;
 
   var CATS = {
     genero: { label: 'Gênero textual', en: 'genre markers and format' },
@@ -22,9 +23,10 @@
     genero: { label: 'Gênero', en: 'o, a, os, as and adjective endings' },
     contracao: { label: 'Contrações', en: 'no, na, pelo, pela, à…' },
     regencia: { label: 'Regência', en: 'Which preposition goes here?' },
-    conjugacao: { label: 'Conjugação', en: 'Infinitive, conjugated or subjunctive' }
+    conjugacao: { label: 'Conjugação', en: 'Infinitive, conjugated or subjunctive' },
+    abertura: { label: 'Aberturas', en: 'Greetings, first lines, closings, sign-offs' }
   };
-  var MODE_ORDER = ['acento', 'genero', 'contracao', 'regencia', 'conjugacao'];
+  var MODE_ORDER = ['acento', 'genero', 'contracao', 'regencia', 'conjugacao', 'abertura'];
   var KIND = { texto: 'Texto', video: 'Transcrição do vídeo', audio: 'Transcrição do áudio' };
   var ROUND_SIZE = 10;
   var TRAY = {
@@ -95,6 +97,7 @@
     var html;
     if (!sec) html = viewHome();
     else if (sec === 'guia' && !parts[1]) html = viewGuide();
+    else if (sec === 'guia' && parts[1] === 'aberturas' && OPEN) html = viewOpenings();
     else if (sec === 'guia' && TASK[parts[1]]) html = viewTask(TASK[parts[1]]);
     else if (sec === 'guia' && GENRE[parts[1]]) html = viewGenre(GENRE[parts[1]]);
     else if (sec === 'pratica' && !parts[1]) html = viewPracticeList();
@@ -143,6 +146,7 @@
     out += '<h2>Proofreading: two passes, every time</h2><div class="grid">' + (OV.proofreading || []).map(function (p) {
       return '<div class="card"><h3>' + esc(p.pass) + '</h3>' + list(p.items) + '</div>';
     }).join('') + '</div>';
+    if (OPEN) out += '<h2>Openings and closings</h2><div class="grid"><a class="tile" href="#/guia/aberturas"><div class="tile-title">Aberturas e fechos</div><div class="tile-sub">How to greet, open, close and sign for every kind of reader, from a city office to a friend.</div></a></div>';
     out += '<h2>The four tasks</h2><div class="grid">' + TASKS.map(function (t) {
       return '<a class="tile" href="#/guia/' + t.id + '"><div class="tile-title">' + esc(t.name) + '</div><div class="tile-sub">' + md(firstSentence(t.summary)) + '</div></a>';
     }).join('') + '</div>';
@@ -210,6 +214,7 @@
     if (g.skeleton) out += '<h2>What it looks like, part by part</h2><div class="card"><ol class="skeleton">' + g.skeleton.map(function (p) {
       return '<li><div class="sk-part">' + esc(p.part) + '</div><div class="sk-what">' + md(p.what) + '</div>' + (p.example ? '<div class="sk-ex">' + md(p.example) + '</div>' : '') + '</li>';
     }).join('') + '</ol></div>';
+    if (OPEN) out += '<p class="small"><a href="#/guia/aberturas">Openings and closings for every reader →</a></p>';
     if (g.wordChoices) out += '<h2>Use this, not that</h2><div class="card"><table class="words"><thead><tr><th>Use</th><th>Not</th><th>Why</th></tr></thead><tbody>' + g.wordChoices.map(function (w) {
       return '<tr><td class="use">' + md(w.use) + '</td><td class="avoid">' + md(w.avoid) + '</td><td class="why">' + md(w.why) + '</td></tr>';
     }).join('') + '</tbody></table></div>';
@@ -233,6 +238,37 @@
     var practice = PROMPTS.filter(function (p) { return p.task === n; });
     if (practice.length) out += '<h2>Practice in this format</h2><div class="grid">' + practice.map(promptTile).join('') + '</div>';
     out += pager(TASKS, t, 'guia');
+    return out;
+  }
+
+  /* ---------- openings and closings ---------- */
+  function ptList(items) { return (items || []).map(function (x) { return '<div class="pt op-item">' + md(x) + '</div>'; }).join(''); }
+  function viewOpenings() {
+    var o = OPEN;
+    var out = '<div class="eyebrow">Guia</div><h1>Aberturas e fechos</h1><p class="lede">' + md(o.intro) + '</p>';
+    out += '<h2>How formal? The greeting ladder</h2><div class="card"><ol class="ladder">' + (o.ladder || []).map(function (l) {
+      return '<li><div class="pt"><b>' + esc(l.pt) + '</b></div><span class="chip">' + esc(l.level) + '</span><div class="small muted">' + md(l.use) + '</div></li>';
+    }).join('') + '</ol></div>';
+    out += '<h2>By reader</h2><p class="small muted">Tap a reader to open it.</p>';
+    out += (o.situations || []).map(function (sit, i) {
+      var gl = (sit.genres || []).filter(function (id) { return GENRE[id]; }).map(function (id) { return '<a class="chip accent" href="#/guia/' + id + '">' + esc(GENRE[id].name) + '</a>'; }).join(' ');
+      var row = function (label, items) { return items && items.length ? '<div class="op-row"><div class="op-label">' + label + '</div><div>' + ptList(items) + '</div></div>' : ''; };
+      return '<details class="reveal op"' + (i === 0 ? ' open' : '') + '><summary>' + esc(sit.title) + '</summary>' +
+        '<p class="small">' + md(sit.reader) + '</p>' + (gl ? '<div class="tile-meta" style="margin-bottom:10px">' + gl + '</div>' : '') +
+        row('Saudação', sit.greeting) + row('Primeira frase', sit.opening) + row('Antes de despedir', sit.closingLines) + row('Despedida', sit.signoff) + row('Assinatura', sit.signature) +
+        (sit.example ? '<div class="op-label" style="margin-top:12px">Example</div><div class="paper op-ex"><p>' + md(sit.example.opening) + '</p><p class="muted" style="margin:.2em 0">[…]</p>' + String(sit.example.closing || '').split('\n').map(function (l) { return '<p class="line">' + md(l) + '</p>'; }).join('') + '</div>' : '') +
+        (sit.avoid && sit.avoid.length ? '<div class="op-label" style="margin-top:12px">Avoid</div><table class="words"><tbody>' + sit.avoid.map(function (a) { return '<tr><td class="avoid">' + md(a.bad) + '</td><td class="why" colspan="2">' + md(a.why) + '</td></tr>'; }).join('') + '</tbody></table>' : '') +
+        '</details>';
+    }).join('');
+    var ph = o.phrases || {};
+    var groups = [['purpose', 'Saying why you write'], ['reference', 'Referring to something earlier'], ['request', 'Asking politely'], ['closing', 'Closing lines']];
+    out += '<h2>Phrase bank</h2>' + groups.filter(function (g) { return ph[g[0]] && ph[g[0]].length; }).map(function (g) {
+      return '<div class="card"><h3>' + g[1] + '</h3><table class="words phrases"><tbody>' + ph[g[0]].map(function (x) { return '<tr><td class="pt">' + md(x.pt) + '</td><td class="why">' + md(x.en) + '</td></tr>'; }).join('') + '</tbody></table></div>';
+    }).join('');
+    if (o.traps && o.traps.length) out += '<h2>Traps</h2><div class="card"><table class="words"><thead><tr><th>Use</th><th>Not</th><th>Why</th></tr></thead><tbody>' + o.traps.map(function (t) {
+      return '<tr><td class="use">' + md(t.good) + '</td><td class="avoid">' + md(t.bad) + '</td><td class="why">' + md(t.why) + '</td></tr>';
+    }).join('') + '</tbody></table></div>';
+    out += '<div class="btn-row"><a class="btn primary" href="#/treino/abertura">Drill: Aberturas</a></div>';
     return out;
   }
 
@@ -374,11 +410,24 @@
     out += '<div class="btn-row" style="justify-content:center"><a class="btn ghost small" href="#/treino">Sair</a></div>';
     return out;
   }
+  var KEEP_ORDER = { genero: 1, contracao: 1 };
+  function optionOrder(d, R) {
+    if (KEEP_ORDER[d.mode]) return d.options;
+    R.orders = R.orders || {};
+    var saved = R.orders[d.id];
+    if (!saved || saved.length !== d.options.length) {
+      saved = d.options.slice();
+      for (var i = saved.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)); var t = saved[i]; saved[i] = saved[j]; saved[j] = t; }
+      R.orders[d.id] = saved; save();
+    }
+    return saved;
+  }
+
   function choiceCard(d, R) {
     var ans = R.answered, given = R.given, ok = given === d.answer;
     var out = '<div class="mode-tag">' + esc(MODES[d.mode].label) + (d.tag ? ' · ' + esc(d.tag) : '') + '</div>';
-    out += '<div class="drill-sentence">' + blankify(d.prompt, ans ? d.answer : '', ans ? (ok ? 'good' : 'bad') : '') + '</div>';
-    out += '<div class="options">' + d.options.map(function (o) {
+    out += '<div class="drill-sentence">' + blankify(d.prompt, ans ? d.answer : '', ans ? 'good' : '') + '</div>';
+    out += '<div class="options' + (d.mode === 'abertura' ? ' stack' : '') + '">' + optionOrder(d, R).map(function (o) {
       var cls = '';
       if (ans && o === d.answer) cls = 'good';
       else if (ans && o === given) cls = 'bad';
@@ -394,7 +443,7 @@
     if (!accentWork || accentWork.id !== d.id) accentWork = { id: d.id, chars: base.split(''), sel: null };
     var ans = R.answered, ok = ans && R.given === d.word;
     var out = '<div class="mode-tag">Acentos · tap a letter</div>';
-    if (d.context) out += '<div class="drill-sentence">' + blankify(d.context, ans ? d.word : '…', ans ? (ok ? 'good' : 'bad') : '') + '</div>';
+    if (d.context) out += '<div class="drill-sentence">' + blankify(d.context, ans ? d.word : '…', ans ? 'good' : '') + '</div>';
     else out += '<div class="drill-sentence muted small">Does this word need an accent?</div>';
     var target = d.word.split('');
     out += '<div class="tiles">' + accentWork.chars.map(function (ch, i) {
