@@ -57,7 +57,8 @@ const base = process.argv[2] || 'file:///Users/mike/Documents/GitHub/celpe-bras-
   }
   // drills: play a full mixed round, answering deliberately wrong sometimes
   await go('#/treino', 'treino');
-  for (const mode of ['acento', 'genero', 'contracao', 'regencia', 'conjugacao', 'abertura', 'mix']) {
+  const modes = await page.evaluate(() => [...new Set(CB.drills.map(d => d.mode))]);
+  for (const mode of modes.concat('mix')) {
     await go('#/treino/' + mode);
     let guard = 0;
     while (guard++ < 40) {
@@ -81,6 +82,37 @@ const base = process.argv[2] || 'file:///Users/mike/Documents/GitHub/celpe-bras-
     console.log(mode, 'round end:', await page.locator('.score-big').textContent().catch(() => 'NOT REACHED'));
     if (mode === 'mix') await page.screenshot({ path: path.join(OUT, 'round-end.png'), fullPage: true });
   }
+  // trilha: path, every lesson intro, and every atomic step of every lesson rendered from a synthetic run
+  await go('#/', 'trilha');
+  const lessons = await page.evaluate(() => (CB.lessons || []).map(L => {
+    const keys = [];
+    (function walk(steps, base) { steps.forEach((s, i) => { const k = base + ':' + i; if (s.type === 'pick') walk(s.from, k); else if (s.type !== 'drills') keys.push(k); }); })(L.steps, 'L:' + L.id);
+    return { id: L.id, keys };
+  }));
+  let stepCount = 0;
+  for (const L of lessons) {
+    await go('#/trilha/' + L.id);
+    await page.evaluate(([id, keys]) => {
+      const s = JSON.parse(localStorage.getItem('cbprep.v1') || '{}'); s.runs = s.runs || {};
+      s.runs[id] = { items: keys.map(k => ({ k })), i: keys.length - 1, ans: {}, retried: {} };
+      localStorage.setItem('cbprep.v1', JSON.stringify(s));
+    }, [L.id, L.keys]);
+    await page.reload(); await page.waitForTimeout(100);
+    for (let k = 1; k <= L.keys.length; k++) {
+      await page.goto(base + '#/trilha/' + L.id + '/' + k); await page.waitForTimeout(40);
+      const txt = await page.locator('#step').textContent().catch(() => '');
+      if (!txt || /no longer exists|Unknown step|not found/.test(txt)) errors.push(L.id + ' step ' + k + ' (' + L.keys[k - 1] + ') did not render');
+      const ov = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
+      if (ov > 1) errors.push('horizontal overflow ' + ov + 'px on ' + L.id + '/' + k);
+      stepCount++;
+    }
+    await page.goto(base + '#/'); await page.waitForTimeout(40);
+    await page.evaluate(id => { const s = JSON.parse(localStorage.getItem('cbprep.v1')); delete s.runs[id]; localStorage.setItem('cbprep.v1', JSON.stringify(s)); }, L.id);
+    await page.reload(); await page.waitForTimeout(60);
+  }
+  console.log('lessons', lessons.length, 'steps rendered', stepCount);
+  await go('#/treino/surpresa', 'surpresa');
+  if (!/surpresa\/1$/.test(await page.evaluate(() => location.hash))) errors.push('surpresa did not start at step 1');
   await go('#/treino/progresso', 'progresso');
   const [dl] = await Promise.all([page.waitForEvent('download'), page.click('#exp-dl')]);
   const f = path.join(OUT, 'export.json'); await dl.saveAs(f);
@@ -90,7 +122,7 @@ const base = process.argv[2] || 'file:///Users/mike/Documents/GitHub/celpe-bras-
   await go('#/treino/genero'); await page.reload(); await page.waitForTimeout(200);
   console.log('after reload h1/eyebrow:', await page.locator('.eyebrow').first().textContent());
   // horizontal overflow check on every main route
-  for (const h of ['#/', '#/guia', '#/pratica', '#/treino', '#/treino/progresso'].concat(data.genres.map(g => '#/guia/' + g))) {
+  for (const h of ['#/', '#/guia', '#/pratica', '#/treino', '#/treino/progresso', '#/treino/surpresa'].concat(data.genres.map(g => '#/guia/' + g))) {
     await page.goto(base + h); await page.waitForTimeout(120);
     const ov = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
     if (ov > 1) errors.push('horizontal overflow ' + ov + 'px on ' + h);

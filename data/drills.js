@@ -248,7 +248,7 @@ CB.drills.push(
   { id: 're-001', mode: 'regencia', prompt: 'Os pais estão preocupados ___ a segurança das crianças.', options: ['com', 'sobre', 'de'], answer: 'com', rule: '*preocupado* takes *com*: *preocupado com algo*.', tag: 'adjetivo' },
   { id: 're-002', mode: 'regencia', prompt: 'A escola vai entregar os aparelhos ___ uma empresa de reciclagem.', options: ['a', 'com', 'em'], answer: 'a', rule: '*entregar* takes *algo a alguém*: you hand something to someone.', tag: 'verbo' },
   { id: 're-003', mode: 'regencia', prompt: 'Precisamos incentivar as crianças ___ usar a imaginação.', options: ['a', '(nada)', 'de'], answer: 'a', rule: '*incentivar alguém a fazer algo*: the infinitive needs *a*.', tag: 'verbo' },
-  { id: 're-004', mode: 'regencia', prompt: 'Se você precisar ___ falar comigo, ligue.', options: ['de', '(nada)'], answer: '(nada)', rule: 'Before an infinitive, *precisar* is best with no preposition: *precisar falar*.', tag: 'verbo' },
+  { id: 're-004', mode: 'regencia', prompt: 'Se você precisar ___ ajuda com a mudança, ligue.', options: ['de', '(nada)'], answer: 'de', rule: 'Before a noun, *precisar* takes *de*: *precisar de ajuda*. Before an infinitive both *precisar falar* and *precisar de falar* are accepted.', tag: 'de' },
 
   // Verbs and adjectives
   { id: 're-005', mode: 'regencia', prompt: 'Precisamos ___ mais ônibus no bairro.', options: ['de', '(nada)'], answer: 'de', rule: 'Before a noun, *precisar* takes *de*: *precisar de algo*.', tag: 'verbo' },

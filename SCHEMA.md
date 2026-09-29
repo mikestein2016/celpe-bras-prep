@@ -140,3 +140,73 @@ CB.models['a-brecho'] = {
 ```
 
 The model answer must satisfy every item in that prompt's `checklist`, use the source facts reworded (never copied, never "segundo o texto" unless the genre is resumo or carta do leitor naming the report), and follow the genre's conventions as described in that genre's guide in `data/genres-a.js` / `data/genres-b.js`.
+
+## CB.drills — two extra choice modes
+
+Same shape as the other choice modes:
+
+- `conectivo`: pick the connector that fits the logic. `{ id: 'cn-001', mode: 'conectivo', prompt: 'O projeto é bom; ___, custa caro.', options: ['porém', 'portanto', 'além disso'], answer: 'porém', rule: '...', tag: 'contraste' }`. Tags: `adição`, `contraste`, `causa`, `consequência`, `conclusão`, `finalidade`, `condição`, `exemplo`, `tempo`.
+- `registro`: pick the option that belongs in formal written Portuguese. `{ id: 'rg-001', mode: 'registro', prompt: 'Na minha rua, ___ muitos buracos.', options: ['há', 'tem'], answer: 'há', rule: '...', tag: 'há/tem' }`. Tags: `há/tem`, `nós/a gente`, `para/pra`, `pronome`, `vocabulário`, `calque`, `gíria`.
+
+Drill ids are prefixed by mode: `ac-`, `ge-`, `co-`, `re-`, `cj-`, `ab-`, `cn-`, `rg-`. New files continue numbering from the highest existing id in that mode.
+
+## CB.lessons — the Trilha (daily lesson path)
+
+A linear path of 21 lessons, one a day to exam day. Each lesson is 10 to 15 minutes and mixes step types. Items the learner misses (choice, order and drill cards) come back at the end of the lesson. Steps inside `pick` are drawn at random each time the lesson is played, so replays differ.
+
+```js
+window.CB = window.CB || {};
+CB.lessons = CB.lessons || [];
+CB.lessons.push({
+  id: 'l01-papel',                 // stable slug, fixed list in the plan
+  n: 1,                            // position on the path
+  unit: 1,                         // 1..5
+  title: 'PT short title',
+  en: 'EN one line: what you will be able to do after it',
+  minutes: 12,
+  steps: [ ...step objects in order... ]
+});
+```
+
+**Step types**
+
+```js
+{ type: 'teach', title: 'EN short heading', body: ['EN paragraph, may quote *português*', ...],
+  examples: [ { pt: 'PT example', en: 'EN gloss or comment' }, ... ],        // optional, 2–5
+  table: [ { use: 'PT', avoid: 'PT', why: 'EN' }, ... ] }                    // optional
+
+{ type: 'choice', q: 'EN question (or PT if it is exam-like)',
+  text: 'PT passage or enunciado shown above the question (optional)',
+  options: ['...', '...', '...'], answer: '...', why: 'EN one or two sentences: why the answer is right and the tempting wrong one is wrong' }
+  // 2–4 options; answer must equal one option exactly. Options are shuffled at display time.
+
+{ type: 'fix', title: 'EN short instruction, e.g. "Find the 4 mistakes in this complaint."',
+  text: 'PT short text (40–90 words) with each error marked {{wrong|right|why}}' }
+  // wrong = the text as it appears (one word or a short phrase, never empty); right = the fix; why = EN one line.
+  // 3–5 errors per text, drawn from the learner's real patterns. Everything outside markers must be flawless.
+  // Do not use | or }} inside the marker parts.
+
+{ type: 'order', q: 'EN instruction, e.g. "Put this carta do leitor in order."',
+  items: ['PT part 1', 'PT part 2', ...],        // IN THE CORRECT ORDER; the app shuffles. 4–6 items, each short
+  why: 'EN one line on the logic of the order',
+  free: [[2, 4]] }                                 // optional: index ranges (inclusive) whose parts may come in any order
+
+{ type: 'write', q: 'EN task: what to write and how long (1–4 sentences)',
+  text: 'PT situation or enunciado (optional)',
+  model: ['PT model answer, one line per element'],
+  check: ['EN self-check item', ...] }           // 3–5 items the learner ticks after comparing
+  // Typed on a phone with autocorrect off. Keep it short: an opening line, a request, a paraphrase, a closing.
+
+{ type: 'drills', modes: ['genero'], tags: ['-ção', '-dade'], n: 6 }
+  // Pulls n cards from CB.drills whose mode is in modes and, if tags is given, whose tag is in tags.
+  // Cards the learner has missed before are weighted up. Tags must exist on real cards (see the drill files).
+
+{ type: 'pick', n: 2, from: [ step, step, step, step ] }
+  // Draws n of the listed steps at random each play. Use it for choice/fix/write banks so replays vary.
+  // from should hold at least n + 2 steps.
+
+{ type: 'prompt', id: 'u-plano-celular', note: 'EN one line: why this prompt now and what to focus on' }
+  // A full timed practice prompt, handwritten, photo sent to Claude. The learner can mark it done or do it later.
+```
+
+**Shape of a good lesson:** teach → 2–3 quick checks (choice, often via pick) → a fix or order step → a short write → a drills step → (sometimes) a prompt. 7 to 11 top-level steps. Every step must be answerable from what the lesson (or an earlier lesson) teaches.

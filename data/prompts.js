@@ -102,7 +102,7 @@ CB.prompts.push(
         "Locutor: E o que vocês fazem com o que colhem?",
         "Marta: Metade fica com quem trabalha na horta. A outra metade a gente doa para a cozinha da creche do bairro. Agora o nosso sonho é conseguir uma caixa d'água, porque no verão a gente carrega balde da casa dos vizinhos."
       ],
-      note: "Stands in for an audio: read it once, cover it, then write."
+      note: "Stands in for a recording: read it once, cover it, then write."
     },
     prompt: "Você escreve para o site de notícias do seu bairro. Com base na entrevista, escreva uma notícia sobre a horta comunitária para informar os moradores e convidá-los a participar.",
     checklist: [
@@ -266,7 +266,7 @@ CB.prompts.push(
         "Locutora: E vai ter mais alguma atração?",
         "Cláudia: Vai, sim! Vai ter contação de histórias às dez e meia e pintura de rosto pra criançada. E o que sobrar no final a gente vai doar pra creche do bairro."
       ],
-      note: "Stands in for an audio: read it once, cover it, then write."
+      note: "Stands in for a recording: read it once, cover it, then write."
     },
     prompt: "Você faz parte da Associação de Pais e Mestres da Escola Municipal Jardim Primavera, que está organizando o evento divulgado na rádio comunitária. Escreva um convite que será publicado no grupo de WhatsApp das famílias e no mural da escola. No convite, chame a comunidade para o evento, explique como funcionam as trocas e oriente as famílias sobre o que pode ser levado.",
     checklist: [
@@ -379,7 +379,7 @@ CB.prompts.push(
         "Apresentador: E se a companhia não responder?",
         "Renata: Primeiro, faz tudo por escrito, por e-mail ou pelo canal oficial, sempre com o número de protocolo. Se não resolver, registra uma reclamação no consumidor.gov.br. Muitas empresas respondem rápido por lá."
       ],
-      note: "Stands in for an audio: read it once, cover it, then write."
+      note: "Stands in for a recording: read it once, cover it, then write."
     },
     prompt: "Você viajou de São Paulo para Recife pela Aurora Linhas Aéreas para participar de um congresso de uma semana. Sua mala não chegou e, cinco dias depois, ainda não foi encontrada. Você registrou o extravio no aeroporto e precisou comprar roupas e produtos de higiene. Escreva um e-mail de reclamação ao SAC da companhia: relate o problema e as providências que você já tomou, exija uma solução para a mala, solicite o reembolso das despesas e informe o que vai fazer se não for atendido.",
     checklist: [

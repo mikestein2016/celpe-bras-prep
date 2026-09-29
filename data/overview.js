@@ -38,7 +38,7 @@ CB.overview = {
     { task: 'Tarefas 3 e 4', steps: ['2 min: read the instructions first', '8 min: read the text, underline 3–4 facts you will use', '5 min: checklist, genre markers, paragraph plan', '25–30 min: write', '5–10 min: two proofreading passes'] }
   ],
   proofreading: [
-    { pass: 'Pass 1: gender and number', items: ['Every *o/a/os/as* matches its noun', '*-ção, -são, -dade, -tude, -gem* are feminine: *a atenção, a cidade, a viagem*', '*-ma* words are masculine: *o problema, o sistema, o tema*', 'Adjectives follow the noun: *celulares velhos, TVs velhas*', 'Traps: *a lei, a mão, a foto, o dia, o mapa*'] },
-    { pass: 'Pass 2: accents and verbs', items: ['*não, também, você, é, está, há, já, só, até*', '*têm* and *vêm* when plural', '*através, invés, após, além, porém*', 'Plurals in *-ões*: *portões, informações, opiniões*', 'Every verb with a subject is conjugated: *para as crianças passarem, os garis que recolhem*'] }
+    { pass: 'Pass 1: agreement', items: ['Every *o/a/os/as* matches its noun', '*-ção, -são, -dade, -tude, -gem* are feminine: *a atenção, a cidade, a viagem*', '*-ma* words are masculine: *o problema, o sistema, o tema*', 'Adjectives follow the noun: *celulares velhos, TVs velhas*', 'Traps: *a lei, a mão, a foto, o dia, o mapa*', 'Every verb with a subject is conjugated and agrees: *para as crianças passarem, os garis que recolhem*'] },
+    { pass: 'Pass 2: accents, crase and prepositions', items: ['*não, também, você, é, está, há, já, só, até*', '*têm* and *vêm* when plural', '*através, invés, após, além, porém*', 'Plurals in *-ões*: *portões, informações, opiniões*', 'Crase: swap in a masculine noun. *Vou ao mercado* → *vou à feira*', 'Verbs with fixed prepositions: *preocupar-se com, sonhar com, chegar a, participar de*'] }
   ]
 };

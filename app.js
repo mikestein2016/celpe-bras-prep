@@ -9,6 +9,8 @@
   var OV = CB.overview || {};
   var MODELS = CB.models || {};
   var OPEN = CB.openings || null;
+  var LESSONS = (CB.lessons || []).slice().sort(function (a, b) { return a.n - b.n; });
+  var UNITS = { 1: 'Ler a proposta', 2: 'Usar a fonte', 3: 'Coesão', 4: 'Seus erros de língua', 5: 'Revisar e simular' };
 
   var CATS = {
     genero: { label: 'Gênero textual', en: 'genre markers and format' },
@@ -24,9 +26,13 @@
     contracao: { label: 'Contrações', en: 'no, na, pelo, pela, à…' },
     regencia: { label: 'Regência', en: 'Which preposition goes here?' },
     conjugacao: { label: 'Conjugação', en: 'Infinitive, conjugated or subjunctive' },
-    abertura: { label: 'Aberturas', en: 'Greetings, first lines, closings, sign-offs' }
+    abertura: { label: 'Aberturas', en: 'Greetings, first lines, closings, sign-offs' },
+    conectivo: { label: 'Conectivos', en: 'Porém, portanto, além disso…' },
+    registro: { label: 'Registro', en: 'Written, not spoken: há, nós, para' }
   };
-  var MODE_ORDER = ['acento', 'genero', 'contracao', 'regencia', 'conjugacao', 'abertura'];
+  var MODE_ORDER = ['acento', 'genero', 'contracao', 'regencia', 'conjugacao', 'conectivo', 'registro', 'abertura'].filter(function (m) {
+    return m === 'acento' || DRILLS.some(function (d) { return d.mode === m; });
+  });
   var KIND = { texto: 'Texto', video: 'Transcrição do vídeo', audio: 'Transcrição do áudio' };
   var ROUND_SIZE = 10;
   var TRAY = {
@@ -35,7 +41,7 @@
 
   var app = document.getElementById('app');
   var byId = function (list) { var m = {}; list.forEach(function (x) { m[x.id] = x; }); return m; };
-  var GENRE = byId(GENRES), TASK = byId(TASKS), PROMPT = byId(PROMPTS), DRILL = byId(DRILLS);
+  var GENRE = byId(GENRES), TASK = byId(TASKS), PROMPT = byId(PROMPTS), DRILL = byId(DRILLS), LESSON = byId(LESSONS);
 
   /* ---------- storage ---------- */
   var KEY = 'cbprep.v1';
@@ -46,6 +52,10 @@
   st.done = st.done || {};
   st.history = st.history || [];
   st.rounds = st.rounds || 0;
+  st.lessons = st.lessons || {};
+  st.runs = st.runs || {};
+  st.writings = st.writings || [];
+  st.lessonMisses = st.lessonMisses || [];
   function save() { try { localStorage.setItem(KEY, JSON.stringify(st)); } catch (e) { /* private mode: keep in memory */ } }
 
   /* ---------- text helpers ---------- */
@@ -85,17 +95,30 @@
 
   /* ---------- router ---------- */
   var cleanup = null;
+  var query = {};
   function route() {
     if (cleanup) { cleanup(); cleanup = null; }
     closeSheet();
-    var parts = (location.hash.replace(/^#\/?/, '') || '').split('/').filter(Boolean);
+    var raw = location.hash.replace(/^#\/?/, '') || '';
+    var qi = raw.indexOf('?');
+    query = {};
+    if (qi >= 0) { raw.slice(qi + 1).split('&').forEach(function (kv) { var p = kv.split('='); if (p[0]) query[p[0]] = decodeURIComponent(p[1] || ''); }); raw = raw.slice(0, qi); }
+    var parts = raw.split('/').filter(Boolean);
     var sec = parts[0] || '';
-    document.querySelectorAll('.tb-nav a').forEach(function (a) { a.classList.toggle('on', a.dataset.sec === sec); });
+    if (sec === 'trilha' && !parts[1]) { location.replace('#/'); return; }
+    var navSec = sec || 'trilha';
+    document.querySelectorAll('.tb-nav a').forEach(function (a) { a.classList.toggle('on', a.dataset.sec === navSec); });
     var back = document.getElementById('tb-back');
     back.hidden = !sec;
-    back.href = parts.length > 1 ? '#/' + sec : '#/';
+    back.href = sec === 'trilha' ? '#/' : (parts.length > 1 ? '#/' + sec : '#/');
     var html;
-    if (!sec) html = viewHome();
+    player = null;
+    if (!sec) html = viewPath();
+    else if (sec === 'trilha' && LESSON[parts[1]] && !parts[2]) html = viewLessonIntro(LESSON[parts[1]]);
+    else if (sec === 'trilha' && LESSON[parts[1]] && parts[2] === 'fim') html = viewRunEnd(lessonCtx(LESSON[parts[1]]));
+    else if (sec === 'trilha' && LESSON[parts[1]]) html = viewPlayer(lessonCtx(LESSON[parts[1]]), parseInt(parts[2], 10));
+    else if (sec === 'treino' && parts[1] === 'surpresa' && parts[2] === 'fim') html = viewRunEnd(surpriseCtx());
+    else if (sec === 'treino' && parts[1] === 'surpresa') html = viewSurprise(parts[2]);
     else if (sec === 'guia' && !parts[1]) html = viewGuide();
     else if (sec === 'guia' && parts[1] === 'aberturas' && OPEN) html = viewOpenings();
     else if (sec === 'guia' && TASK[parts[1]]) html = viewTask(TASK[parts[1]]);
@@ -106,6 +129,7 @@
     else if (sec === 'treino' && parts[1] === 'progresso') html = viewProgress();
     else if (sec === 'treino' && (parts[1] === 'mix' || MODES[parts[1]])) html = viewRound(parts[1]);
     else html = '<h1>Página não encontrada</h1><p><a href="#/">Voltar ao início</a></p>';
+    if (html == null) return;
     app.innerHTML = html;
     window.scrollTo(0, 0);
     bind(sec, parts);
@@ -117,16 +141,516 @@
     var d = Math.ceil((new Date(CB.examDate) - new Date()) / 86400000);
     return d;
   }
-  function viewHome() {
+  /* ---------- trilha: the lesson path ---------- */
+  var ICON_CHECK = '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M5 12.5l4.2 4.2L19 7" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+  function nextLesson() {
+    for (var i = 0; i < LESSONS.length; i++) if (!st.lessons[LESSONS[i].id]) return LESSONS[i];
+    return null;
+  }
+  function lessonPrompts(L) {
+    var ids = [];
+    (L.steps || []).forEach(function (s) { if (s.type === 'prompt' && PROMPT[s.id]) ids.push(s.id); });
+    return ids;
+  }
+  function paceLine(left) {
     var d = daysLeft();
-    var cd = d > 0 ? '<div class="countdown"><b>' + d + '</b><span>' + (d === 1 ? 'dia' : 'dias') + ' até a Parte Escrita, 20 de outubro às 9h</span></div>' : '';
-    var doneCount = Object.keys(st.done).length;
-    return '<div class="eyebrow">Study pack</div><h1>Celpe-Bras: Parte Escrita</h1>' + cd +
-      '<div class="hero-tiles">' +
-      '<a class="tile" href="#/guia"><div class="tile-title">Guia</div><div class="tile-sub">How the four tasks work, every genre with an annotated model answer, and what earns the points.</div><div class="tile-meta"><span class="chip accent">' + TASKS.length + ' tarefas</span><span class="chip accent">' + GENRES.length + ' gêneros</span></div></a>' +
-      '<a class="tile" href="#/pratica"><div class="tile-title">Prática</div><div class="tile-sub">Real-format prompts to write by hand with a timer. Send a photo to Claude for grading.</div><div class="tile-meta"><span class="chip accent">' + PROMPTS.length + ' propostas</span>' + (doneCount ? '<span class="chip done">' + doneCount + ' feitas</span>' : '') + '</div></a>' +
-      '<a class="tile" href="#/treino"><div class="tile-title">Treino</div><div class="tile-sub">Quick drills on accents, gender, contractions, prepositions and verbs. Tap to answer.</div><div class="tile-meta"><span class="chip accent">' + DRILLS.length + ' cartas</span></div></a>' +
-      '</div>';
+    if (!left) return 'Trilha completa. Keep going with a Sessão surpresa every day and one handwritten prompt.';
+    if (d <= 0) return '';
+    var days = Math.max(1, d - 1);
+    if (left <= days) return left + (left === 1 ? ' lesson' : ' lessons') + ' left and ' + days + (days === 1 ? ' day' : ' days') + ' before the exam. One a day gets you there.';
+    return left + ' lessons left and ' + days + (days === 1 ? ' day' : ' days') + ' before the exam. Do ' + Math.ceil(left / days) + ' a day to finish on time.';
+  }
+  function viewPath() {
+    var d = daysLeft();
+    var doneN = LESSONS.filter(function (l) { return st.lessons[l.id]; }).length;
+    var cur = nextLesson();
+    var out = '<div class="eyebrow">Trilha</div><h1>Celpe-Bras: Parte Escrita</h1>';
+    if (d > 0) out += '<div class="countdown"><b>' + d + '</b><span>' + (d === 1 ? 'dia' : 'dias') + ' até a Parte Escrita, 20 de outubro às 9h</span></div>';
+    if (!LESSONS.length) return out + '<p class="empty">No lessons loaded.</p>';
+    out += '<div class="path-top"><div class="path-count"><b>' + doneN + '</b> de ' + LESSONS.length + ' lições</div><div class="progress"><i style="width:' + Math.round(100 * doneN / LESSONS.length) + '%"></i></div><p class="small muted" style="margin:0">' + esc(paceLine(LESSONS.length - doneN)) + '</p></div>';
+    var unit = null;
+    out += '<div class="path">';
+    LESSONS.forEach(function (L) {
+      if (L.unit !== unit) {
+        if (unit !== null) out += '</ol>';
+        unit = L.unit;
+        out += '<h2 class="unit-head"><span>Unidade ' + unit + '</span>' + esc(UNITS[unit] || '') + '</h2><ol class="nodes">';
+      }
+      var ls = st.lessons[L.id], isCur = cur && cur.id === L.id, run = st.runs[L.id];
+      var inProgress = run && !run.finished && run.i > 0;
+      var pids = lessonPrompts(L);
+      var pending = ls && pids.some(function (id) { return !st.done[id]; });
+      var labels = [];
+      if (ls) labels.push('<span class="chip done">Feita</span>');
+      if (isCur) labels.push('<span class="chip accent">' + (inProgress ? 'Em andamento' : 'Próxima') + '</span>');
+      if (pids.length) labels.push('<span class="chip' + (pending ? ' warn' : '') + '">' + (pending ? 'Redação pendente' : 'Redação à mão') + '</span>');
+      out += '<li><a class="node' + (ls ? ' done' : '') + (isCur ? ' current' : '') + '" id="node-' + L.id + '" href="#/trilha/' + L.id + '">' +
+        '<span class="dot">' + (ls ? ICON_CHECK : L.n) + '</span>' +
+        '<span class="node-body"><span class="node-title">' + esc(L.title) + '</span><span class="node-sub">' + md(L.en) + ' · ' + L.minutes + ' min</span>' +
+        (labels.length ? '<span class="tile-meta">' + labels.join('') + '</span>' : '') + '</span></a></li>';
+    });
+    out += '</ol></div>';
+    out += '<h2>Também</h2><div class="grid">' +
+      '<a class="tile" href="#/treino/surpresa"><div class="tile-title">Sessão surpresa</div><div class="tile-sub">A fresh mix of questions, corrections, writing and cards from the whole path.</div></a>' +
+      '<a class="tile" href="#/pratica"><div class="tile-title">Prática</div><div class="tile-sub">' + PROMPTS.length + ' prompts to write by hand with a timer.</div></a>' +
+      '<a class="tile" href="#/treino"><div class="tile-title">Treino</div><div class="tile-sub">' + DRILLS.length + ' quick cards by topic.</div></a>' +
+      '<a class="tile" href="#/guia"><div class="tile-title">Guia</div><div class="tile-sub">The four tasks and every genre, with model answers.</div></a></div>';
+    return out;
+  }
+  function bindPath() {
+    var cur = nextLesson();
+    var el = cur && document.getElementById('node-' + cur.id);
+    if (el && el.getBoundingClientRect().bottom > window.innerHeight - 40) el.scrollIntoView({ block: 'center' });
+  }
+
+  function stepTypeCount(L) {
+    var c = {};
+    function add(s) {
+      if (s.type === 'pick') { for (var i = 0; i < s.n; i++) add(s.from[i]); return; }
+      var k = s.type === 'drills' ? 'cards' : s.type;
+      c[k] = (c[k] || 0) + (s.type === 'drills' ? s.n : 1);
+    }
+    (L.steps || []).forEach(add);
+    var names = { teach: ['explicação', 'explicações'], choice: ['pergunta', 'perguntas'], fix: ['correção', 'correções'], order: ['ordenação', 'ordenações'], write: ['escrita curta', 'escritas curtas'], cards: ['carta', 'cartas'], prompt: ['redação à mão', 'redações à mão'] };
+    return Object.keys(names).filter(function (k) { return c[k]; }).map(function (k) { return c[k] + ' ' + names[k][c[k] === 1 ? 0 : 1]; });
+  }
+  function viewLessonIntro(L) {
+    var ls = st.lessons[L.id], run = st.runs[L.id];
+    var going = run && !run.finished && run.i > 0;
+    var out = '<div class="eyebrow">Lição ' + L.n + ' · Unidade ' + L.unit + '</div><h1>' + esc(L.title) + '</h1><p class="lede">' + md(L.en) + '</p>';
+    out += '<div class="tile-meta" style="margin-bottom:14px"><span class="chip accent">' + L.minutes + ' min</span>' + stepTypeCount(L).map(function (t) { return '<span class="chip">' + esc(t) + '</span>'; }).join('') + '</div>';
+    if (ls) out += '<div class="card small">Done on ' + new Date(ls.done).toLocaleDateString('pt-BR') + (ls.best ? ' · best ' + ls.best : '') + (ls.plays > 1 ? ' · played ' + ls.plays + ' times' : '') + '. Playing it again draws new questions and cards.</div>';
+    out += '<div class="btn-row stretch">';
+    if (going) out += '<a class="btn primary" href="#/trilha/' + L.id + '/' + (run.i + 1) + '">Continuar (' + (run.i + 1) + ' de ' + run.items.length + ')</a><button class="btn" id="l-restart">Recomeçar</button>';
+    else out += '<button class="btn primary" id="l-start">' + (ls ? 'Refazer' : 'Começar') + '</button>';
+    out += '</div>';
+    out += pagerLessons(L);
+    return out;
+  }
+  function pagerLessons(L) {
+    var i = LESSONS.indexOf(L), prev = LESSONS[i - 1], next = LESSONS[i + 1];
+    return '<div class="pager">' +
+      (prev ? '<a href="#/trilha/' + prev.id + '"><small>Anterior</small>' + esc(prev.title) + '</a>' : '<span style="flex:1"></span>') +
+      (next ? '<a class="next" href="#/trilha/' + next.id + '"><small>Próxima</small>' + esc(next.title) + '</a>' : '<span style="flex:1"></span>') + '</div>';
+  }
+  function bindLessonIntro(L) {
+    var start = function () { st.runs[L.id] = buildRun(L); save(); location.hash = '#/trilha/' + L.id + '/1'; };
+    var b = document.getElementById('l-start'); if (b) b.onclick = start;
+    var r = document.getElementById('l-restart'); if (r) r.onclick = start;
+  }
+
+  /* runs: a lesson or surprise session expanded into atomic items */
+  function shuffle(a) { a = a.slice(); for (var i = a.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)); var t = a[i]; a[i] = a[j]; a[j] = t; } return a; }
+  function drawCards(spec, taken) {
+    var modes = spec.modes && spec.modes.length ? spec.modes : null, tags = spec.tags && spec.tags.length ? spec.tags : null;
+    var ok = function (d) { return !taken[d.id] && (!modes || modes.indexOf(d.mode) >= 0); };
+    var pool = DRILLS.filter(function (d) { return ok(d) && (!tags || tags.indexOf(d.tag) >= 0); }).map(function (d) { return d.id; });
+    if (pool.length < spec.n) pool = pool.concat(DRILLS.filter(function (d) { return ok(d) && pool.indexOf(d.id) < 0; }).map(function (d) { return d.id; }));
+    var out = [];
+    while (out.length < spec.n && pool.length) {
+      var tot = 0; pool.forEach(function (id) { tot += weight(id); });
+      var r = Math.random() * tot, pick = pool[pool.length - 1];
+      for (var i = 0; i < pool.length; i++) { r -= weight(pool[i]); if (r <= 0) { pick = pool[i]; break; } }
+      out.push(pick); taken[pick] = 1; pool.splice(pool.indexOf(pick), 1);
+    }
+    return out;
+  }
+  function expand(step, key, taken, items) {
+    if (!step) return;
+    if (step.type === 'drills') { drawCards(step, taken).forEach(function (id) { items.push({ k: 'D:' + id }); }); return; }
+    if (step.type === 'pick') {
+      var idx = shuffle(step.from.map(function (_, i) { return i; })).slice(0, step.n).sort(function (a, b) { return a - b; });
+      idx.forEach(function (i) { expand(step.from[i], key + ':' + i, taken, items); });
+      return;
+    }
+    items.push({ k: key });
+  }
+  function buildRun(L) {
+    var items = [], taken = {};
+    (L.steps || []).forEach(function (s, i) { expand(s, 'L:' + L.id + ':' + i, taken, items); });
+    return { items: items, i: 0, ans: {}, retried: {}, started: new Date().toISOString() };
+  }
+  function resolve(k) {
+    var p = k.split(':');
+    if (p[0] === 'D') { var d = DRILL[p[1]]; return d ? { type: 'card', card: d } : null; }
+    var L = LESSON[p[1]]; if (!L) return null;
+    var s = L.steps[+p[2]];
+    for (var i = 3; i < p.length && s; i++) s = s.from && s.from[+p[i]];
+    return s || null;
+  }
+  function allAtoms() {
+    var atoms = [];
+    LESSONS.forEach(function (L) {
+      (function walk(steps, base) {
+        steps.forEach(function (s, i) {
+          var k = base + ':' + i;
+          if (s.type === 'pick') walk(s.from, k);
+          else atoms.push({ k: k, type: s.type, lid: L.id });
+        });
+      })(L.steps || [], 'L:' + L.id);
+    });
+    return atoms;
+  }
+  function buildSurprise() {
+    var atoms = allAtoms(), items = [], taken = {};
+    var reached = {}; LESSONS.forEach(function (L) { if (st.lessons[L.id] || (st.runs[L.id] && st.runs[L.id].i > 0)) reached[L.id] = 1; });
+    function take(type, n) {
+      var pool = atoms.filter(function (a) { return a.type === type; });
+      var mine = pool.filter(function (a) { return reached[a.lid]; });
+      if (mine.length >= n * 2) pool = mine;
+      return shuffle(pool).slice(0, n).map(function (a) { return { k: a.k }; });
+    }
+    var cards = drawCards({ n: 5 }, taken).map(function (id) { return { k: 'D:' + id }; });
+    items = shuffle(take('choice', 3).concat(take('order', 1), cards.slice(0, 3)));
+    items = items.concat(take('fix', 1), cards.slice(3), take('write', 1));
+    return { items: items, i: 0, ans: {}, retried: {}, started: new Date().toISOString() };
+  }
+  function lessonCtx(L) {
+    return { kind: 'lesson', L: L, key: L.id, base: '#/trilha/' + L.id, title: 'Lição ' + L.n + ' · ' + L.title, exit: '#/' };
+  }
+  function surpriseCtx() {
+    return { kind: 'surpresa', key: 'surpresa', base: '#/treino/surpresa', title: 'Sessão surpresa', exit: '#/treino' };
+  }
+  function viewSurprise(k) {
+    var run = st.runs.surpresa;
+    if (!run || run.finished || !run.items.length) { st.runs.surpresa = buildSurprise(); save(); location.replace('#/treino/surpresa/1'); return null; }
+    if (!k) { location.replace('#/treino/surpresa/' + (run.i + 1)); return null; }
+    return viewPlayer(surpriseCtx(), parseInt(k, 10));
+  }
+
+  /* player */
+  var player = null;
+  function viewPlayer(ctx, k) {
+    var run = st.runs[ctx.key];
+    if (!run) { location.replace(ctx.kind === 'lesson' ? ctx.base : '#/treino/surpresa'); return null; }
+    if (run.finished && k > run.items.length) { location.replace(ctx.base + '/fim'); return null; }
+    if (!(k >= 1) || k > run.i + 1 || k > run.items.length) { location.replace(ctx.base + '/' + Math.min(run.i + 1, run.items.length)); return null; }
+    var pos = k - 1, item = run.items[pos], step = resolve(item.k);
+    player = { ctx: ctx, run: run, pos: pos, item: item, step: step };
+    var out = '<div class="round-head"><div class="eyebrow" style="margin:0">' + esc(ctx.title) + '</div><a class="small muted" href="' + ctx.exit + '">Sair</a></div>';
+    out += '<div class="progress" title="' + k + ' de ' + run.items.length + '"><i style="width:' + Math.round(100 * pos / run.items.length) + '%"></i></div>';
+    out += '<div class="step" id="step">' + stepHtml() + '</div>';
+    return out;
+  }
+  function isLastPos() { return player.pos + 1 >= player.run.items.length; }
+  function nextBtn(label) {
+    return '<div class="drill-actions"><button class="btn primary" id="next">' + (label || (isLastPos() ? 'Ver resultado' : 'Próxima')) + '</button></div>';
+  }
+  function againNote() { return player.item.r ? '<span class="chip warn">De novo</span> ' : ''; }
+  function stepHtml() {
+    var s = player.step, a = player.run.ans[player.pos];
+    if (!s) return '<p class="empty">This item no longer exists.</p>' + nextBtn();
+    switch (s.type) {
+      case 'card': return cardStepHtml(s.card, a);
+      case 'teach': return teachHtml(s);
+      case 'choice': return choiceHtml(s, a);
+      case 'order': return orderHtml(s, a);
+      case 'fix': return fixHtml(s, a);
+      case 'write': return writeHtml(s, a);
+      case 'prompt': return promptStepHtml(s, a);
+    }
+    return '<p class="empty">Unknown step.</p>' + nextBtn();
+  }
+  function rerender() { var box = document.getElementById('step'); if (!box) return; box.innerHTML = stepHtml(); bindStep(); }
+
+  function teachHtml(s) {
+    var out = '<div class="step-card left"><div class="mode-tag">Explicação</div><h2 class="step-h">' + md(s.title) + '</h2>';
+    out += (s.body || []).map(function (p) { return '<p>' + md(p) + '</p>'; }).join('');
+    if (s.examples && s.examples.length) out += '<div class="examples">' + s.examples.map(function (e) { return '<div class="ex"><div class="pt">' + md(e.pt) + '</div>' + (e.en ? '<div class="small muted">' + md(e.en) + '</div>' : '') + '</div>'; }).join('') + '</div>';
+    if (s.table && s.table.length) out += '<table class="words"><thead><tr><th>Use</th><th>Not</th><th>Why</th></tr></thead><tbody>' + s.table.map(function (w) {
+      return '<tr><td class="use">' + md(w.use) + '</td><td class="avoid">' + md(w.avoid) + '</td><td class="why">' + md(w.why) + '</td></tr>';
+    }).join('') + '</tbody></table>';
+    return out + '</div>' + nextBtn('Entendi');
+  }
+
+  function choiceHtml(s, a) {
+    var run = player.run;
+    run.orders = run.orders || {};
+    var ok_ = run.orders[player.item.k];
+    if (!ok_ || ok_.length !== s.options.length) { ok_ = run.orders[player.item.k] = shuffle(s.options); save(); }
+    var out = '<div class="step-card"><div class="mode-tag">' + againNote() + 'Pergunta</div>';
+    if (s.text) {
+      var fill = a && String(s.answer).length <= 30 ? s.answer : '';
+      out += '<div class="passage pt">' + String(s.text).split('\n').map(function (l) { return '<p>' + (l.indexOf('___') >= 0 ? blankify(l, fill, fill ? 'good' : '') : md(l)) + '</p>'; }).join('') + '</div>';
+    }
+    out += '<div class="q">' + md(s.q) + '</div><div class="options stack">' + ok_.map(function (o) {
+      var cls = '';
+      if (a && o === s.answer) cls = 'good'; else if (a && o === a.given) cls = 'bad';
+      return '<button class="opt ' + cls + '" data-opt="' + esc(o) + '"' + (a ? ' disabled' : '') + '>' + md(o) + '</button>';
+    }).join('') + '</div>';
+    if (a) out += '<div class="feedback ' + (a.ok ? 'good' : 'bad') + '"><b>' + (a.ok ? 'Certo!' : 'Quase.') + '</b><div>' + md(s.why) + '</div>' + (a.retry ? '<div class="again">This one comes back before the lesson ends.</div>' : '') + '</div>';
+    out += '</div>';
+    return out + (a ? nextBtn() : '');
+  }
+
+  function orderHtml(s, a) {
+    var run = player.run;
+    run.work = run.work || {};
+    var w = run.work[player.pos];
+    if (!w) { w = run.work[player.pos] = { shuffled: shuffle(s.items.map(function (_, i) { return i; })), built: [] }; save(); }
+    var out = '<div class="step-card left"><div class="mode-tag">' + againNote() + 'Ordem</div><div class="q">' + md(s.q) + '</div>';
+    out += '<ol class="order-built">' + (w.built.length ? '' : '<li class="placeholder">Tap the parts below in order.</li>') + w.built.map(function (i, n) {
+      var r = inFree(s, n), cls = a ? ((r ? i >= r[0] && i <= r[1] : i === n) ? ' good' : ' bad') : '';
+      return '<li><button class="ord' + cls + '" data-built="' + n + '"' + (a ? ' disabled' : '') + '>' + md(s.items[i]) + '</button></li>';
+    }).join('') + '</ol>';
+    if (!a) {
+      out += '<div class="order-pool">' + w.shuffled.filter(function (i) { return w.built.indexOf(i) < 0; }).map(function (i) {
+        return '<button class="ord" data-item="' + i + '">' + md(s.items[i]) + '</button>';
+      }).join('') + '</div>';
+      out += '<div class="drill-actions"><button class="btn primary" id="ord-check"' + (w.built.length < s.items.length ? ' disabled' : '') + '>Verificar</button></div>';
+    } else {
+      out += '<div class="feedback ' + (a.ok ? 'good' : 'bad') + '"><b>' + (a.ok ? 'Certo!' : 'Quase.') + '</b>' +
+        (a.ok ? '' : '<p style="margin:0 0 .4em">The right order:</p><ol class="pt small">' + s.items.map(function (x) { return '<li>' + md(x) + '</li>'; }).join('') + '</ol>') +
+        (s.free && s.free.length ? '<p class="small" style="margin:0 0 .4em">' + s.free.map(function (r) { return 'Parts ' + (r[0] + 1) + ' to ' + (r[1] + 1); }).join(' and ') + ' can go in any order.</p>' : '') +
+        '<div>' + md(s.why) + '</div>' + (a.retry ? '<div class="again">This one comes back before the lesson ends.</div>' : '') + '</div>';
+    }
+    out += '</div>';
+    return out + (a ? nextBtn() : '');
+  }
+
+  function inFree(s, n) { return (s.free || []).filter(function (r) { return n >= r[0] && n <= r[1]; })[0]; }
+  function orderOk(s, built) {
+    return built.length === s.items.length && built.every(function (i, n) {
+      var r = inFree(s, n);
+      return r ? i >= r[0] && i <= r[1] : i === n;
+    });
+  }
+  var FIX_RE = /\{\{([^|{}]+)\|([^|{}]*)\|([^{}]*)\}\}/g;
+  function parseFix(text) {
+    var toks = [], errs = [], last = 0, m;
+    function plain(str) {
+      str.split(/(\s+)/).forEach(function (w) {
+        if (!w) return;
+        if (/^\s+$/.test(w)) toks.push({ sp: w }); else toks.push({ w: w });
+      });
+    }
+    FIX_RE.lastIndex = 0;
+    while ((m = FIX_RE.exec(text))) {
+      plain(text.slice(last, m.index));
+      errs.push({ wrong: m[1], right: m[2], why: m[3] });
+      toks.push({ w: m[1], e: errs.length - 1 });
+      last = FIX_RE.lastIndex;
+    }
+    plain(text.slice(last));
+    return { toks: toks, errs: errs };
+  }
+  function fixHtml(s, a) {
+    var run = player.run, P = parseFix(s.text);
+    run.work = run.work || {};
+    var w = run.work[player.pos] || (run.work[player.pos] = { flags: {}, fixed: false });
+    var out = '<div class="step-card left"><div class="mode-tag">Revisão</div><div class="q">' + md(s.title) + '</div>';
+    if (!a) out += '<p class="small muted">Tap each word you think is wrong. Tap again to unmark. There ' + (P.errs.length === 1 ? 'is 1 mistake' : 'are ' + P.errs.length + ' mistakes') + '.</p>';
+    out += '<div class="fixtext pt">' + P.toks.map(function (t, i) {
+      if (t.sp) return t.sp.indexOf('\n') >= 0 ? '<br>' : ' ';
+      var flagged = !!w.flags[i], cls = 'fw';
+      if (!a) return '<button class="' + cls + (flagged ? ' flag' : '') + '" data-t="' + i + '">' + esc(t.w) + '</button>';
+      if (t.e != null) {
+        cls += flagged ? ' hit' : ' miss';
+        return '<button class="' + cls + '" data-e="' + t.e + '">' + esc(w.fixed ? (t.w === t.w.trim() ? P.errs[t.e].right : P.errs[t.e].right) : t.w) + '<sup>' + (t.e + 1) + '</sup></button>';
+      }
+      return '<span class="fw' + (flagged ? ' false' : '') + '">' + esc(t.w) + '</span>';
+    }).join('') + '</div>';
+    if (!a) out += '<div class="drill-actions"><button class="btn primary" id="fix-check">Verificar</button></div>';
+    else {
+      out += '<div class="feedback ' + (a.found === a.total && !a.falses ? 'good' : 'bad') + '"><b>You found ' + a.found + ' of ' + a.total + '.' + (a.falses ? ' ' + a.falses + ' marked word' + (a.falses === 1 ? ' was' : 's were') + ' fine.' : '') + '</b></div>';
+      out += '<ol class="fix-notes">' + P.errs.map(function (e, i) {
+        return '<li class="' + (a.hits[i] ? 'hit' : 'miss') + '"><span class="pt"><s>' + esc(e.wrong) + '</s> → <b>' + esc(e.right || '(remove)') + '</b></span><div class="small">' + md(e.why) + '</div></li>';
+      }).join('') + '</ol>';
+      out += '<div class="btn-row"><button class="btn" id="fix-toggle">' + (w.fixed ? 'Mostrar os erros' : 'Mostrar corrigido') + '</button></div>';
+    }
+    out += '</div>';
+    return out + (a ? nextBtn() : '');
+  }
+
+  function writeHtml(s, a) {
+    var run = player.run;
+    run.work = run.work || {};
+    var w = run.work[player.pos] || (run.work[player.pos] = { text: '', checks: {} });
+    var out = '<div class="step-card left"><div class="mode-tag">Escrita</div><div class="q">' + md(s.q) + '</div>';
+    if (s.text) out += '<div class="passage pt">' + String(s.text).split('\n').map(function (l) { return '<p>' + md(l) + '</p>'; }).join('') + '</div>';
+    out += '<textarea id="w-text" class="write pt" rows="5" autocomplete="off" autocorrect="off" autocapitalize="sentences" spellcheck="false" lang="pt-BR" placeholder="Escreva aqui, sem corretor."' + (a ? ' readonly' : '') + '>' + esc(w.text) + '</textarea>';
+    if (!a) {
+      out += '<p class="small muted">Autocorrect is off, as on paper. Put in every accent yourself.</p>';
+      out += '<div class="drill-actions"><button class="btn primary" id="w-show"' + (wordCount(w.text) < 3 ? ' disabled' : '') + '>Ver o modelo</button></div><div class="btn-row" style="justify-content:center;margin:6px 0 0"><button class="btn ghost small" id="w-skip">Pular</button></div>';
+    } else {
+      out += '<h3>Modelo</h3><div class="paper">' + (s.model || []).map(function (l) { return '<p' + (l.length < 60 ? ' class="line"' : '') + '>' + md(l) + '</p>'; }).join('') + '</div>';
+      out += '<h3>Check yours</h3><ul class="selfcheck">' + (s.check || []).map(function (c, i) {
+        return '<li><label><input type="checkbox" data-c="' + i + '"' + (w.checks[i] ? ' checked' : '') + '> <span>' + md(c) + '</span></label></li>';
+      }).join('') + '</ul><p class="small muted">Saved. It goes out with your progress export so Claude can read it.</p>';
+    }
+    out += '</div>';
+    return out + (a ? nextBtn() : '');
+  }
+  function wordCount(t) { return String(t || '').trim().split(/\s+/).filter(Boolean).length; }
+
+  function promptStepHtml(s, a) {
+    var p = PROMPT[s.id], g = p && GENRE[p.genre];
+    if (!p) return '<p class="empty">Prompt not found.</p>' + nextBtn();
+    var done = !!st.done[p.id];
+    var out = '<div class="step-card left"><div class="mode-tag">Redação à mão</div><h2 class="step-h">' + esc(p.label) + '. ' + esc(p.title) + '</h2>';
+    out += '<div class="tile-meta" style="margin:0 0 10px"><span class="chip accent">' + taskLabel(p.task) + '</span>' + (g ? '<span class="chip">' + esc(g.name) + '</span>' : '') + '<span class="chip">' + p.minutes + ' min</span>' + (done ? '<span class="chip done">feita ✓</span>' : '') + '</div>';
+    if (s.note) out += '<p>' + md(s.note) + '</p>';
+    out += '<p class="small muted">Write it by hand with the timer, do both proofreading passes, then send a photo to Claude for a score.</p>';
+    out += '<div class="btn-row stretch"><a class="btn' + (done ? '' : ' primary') + '" href="#/pratica/' + p.id + '?de=' + encodeURIComponent(player.ctx.base.replace(/^#\//, '') + '/' + (player.pos + 1)) + '">Abrir a proposta</a></div>';
+    if (!a) out += '<div class="btn-row stretch"><button class="btn" id="pr-done">' + (done ? 'Feita, continuar' : 'Já fiz') + '</button><button class="btn ghost" id="pr-later">Fazer depois</button></div>';
+    out += '</div>';
+    return out + (a ? nextBtn() : '');
+  }
+
+  function cardStepHtml(d, a) {
+    var V = cardView(d, a);
+    var body = d.mode === 'acento' ? accentCard(d, V) : choiceCard(d, V);
+    if (player.item.r) body = body.replace('<div class="mode-tag">', '<div class="mode-tag">' + againNote());
+    return '<div class="drill" id="drill">' + body + '</div>';
+  }
+  function cardView(d, a) {
+    var run = player.run;
+    run.orders = run.orders || {};
+    var V = { answered: !!a, given: a ? a.given : null, orders: run.orders, requeued: {}, i: 0, queue: isLastPos() ? [0] : [0, 1] };
+    if (a && a.retry) V.requeued[d.id] = 0;
+    return V;
+  }
+
+  function recordMiss(kind, s, given) {
+    st.lessonMisses.push({ k: player.item.k, type: kind, q: s.q || s.title || '', given: given, at: new Date().toISOString() });
+    if (st.lessonMisses.length > 200) st.lessonMisses = st.lessonMisses.slice(-200);
+  }
+  function settle(ok, extra) {
+    var run = player.run, a = extra || {};
+    a.ok = ok;
+    if (!ok && !player.item.r && !run.retried[player.item.k]) { run.retried[player.item.k] = 1; run.items.push({ k: player.item.k, r: 1 }); a.retry = true; }
+    run.ans[player.pos] = a;
+    save();
+    rerender();
+    var nx = document.getElementById('next'); if (nx) nx.focus();
+  }
+  function bindStep() {
+    var P = player, s = P.step, run = P.run, a = run.ans[P.pos];
+    var nx = document.getElementById('next');
+    if (nx) nx.onclick = function () {
+      if (P.pos === run.i) run.i++;
+      if (run.i >= run.items.length) { finishRun(P.ctx, run); save(); location.hash = P.ctx.base + '/fim'; return; }
+      save(); location.hash = P.ctx.base + '/' + (P.pos + 2);
+    };
+    if (!s) return;
+    if (s.type === 'teach' && !a) { run.ans[P.pos] = { seen: 1 }; save(); }
+    if (a) {
+      if (s.type === 'fix') {
+        document.getElementById('fix-toggle').onclick = function () { run.work[P.pos].fixed = !run.work[P.pos].fixed; save(); rerender(); };
+        var P2 = parseFix(s.text);
+        app.querySelectorAll('.fixtext .fw[data-e]').forEach(function (b) {
+          b.onclick = function () { var e = P2.errs[+b.dataset.e]; openSheet('<div class="note-cat">' + (+b.dataset.e + 1) + ' · ' + esc(e.wrong) + ' → ' + esc(e.right) + '</div><p style="margin:.4em 0 0">' + md(e.why) + '</p>'); };
+        });
+      }
+      if (s.type === 'write') app.querySelectorAll('.selfcheck input').forEach(function (cb) {
+        cb.onchange = function () { run.work[P.pos].checks[cb.dataset.c] = cb.checked; save(); };
+      });
+      return;
+    }
+    if (s.type === 'card') {
+      var d = s.card, box = document.getElementById('drill');
+      bindCard(d, cardView(d, null), box, function (given) {
+        var ok = gradeCard(d, given);
+        settle(ok, { given: given });
+      });
+    } else if (s.type === 'choice') {
+      app.querySelectorAll('#step .opt').forEach(function (b) {
+        b.onclick = function () { var ok = b.dataset.opt === s.answer; if (!ok) recordMiss('choice', s, b.dataset.opt); settle(ok, { given: b.dataset.opt }); };
+      });
+    } else if (s.type === 'order') {
+      var w = run.work[P.pos];
+      app.querySelectorAll('.order-pool .ord').forEach(function (b) { b.onclick = function () { w.built.push(+b.dataset.item); save(); rerender(); }; });
+      app.querySelectorAll('.order-built .ord').forEach(function (b) { b.onclick = function () { w.built.splice(+b.dataset.built, 1); save(); rerender(); }; });
+      var oc = document.getElementById('ord-check');
+      if (oc) oc.onclick = function () {
+        var ok = orderOk(s, w.built);
+        if (!ok) { recordMiss('order', s, w.built.join(',')); }
+        settle(ok, {});
+        if (!ok && run.ans[P.pos].retry) { /* the retry gets a fresh shuffle */ }
+      };
+    } else if (s.type === 'fix') {
+      var fw = run.work[P.pos];
+      app.querySelectorAll('.fixtext .fw[data-t]').forEach(function (b) {
+        b.onclick = function () { var i = +b.dataset.t; if (fw.flags[i]) delete fw.flags[i]; else fw.flags[i] = 1; b.classList.toggle('flag', !!fw.flags[i]); save(); };
+      });
+      document.getElementById('fix-check').onclick = function () {
+        var PF = parseFix(s.text), hits = {}, found = 0, falses = 0;
+        PF.toks.forEach(function (t, i) {
+          if (t.e != null && fw.flags[i]) { hits[t.e] = 1; found++; }
+          else if (t.e == null && fw.flags[i]) falses++;
+        });
+        if (found < PF.errs.length) recordMiss('fix', s, PF.errs.filter(function (_, i) { return !hits[i]; }).map(function (e) { return e.wrong; }).join(' | '));
+        run.ans[P.pos] = { ok: found === PF.errs.length, found: found, total: PF.errs.length, falses: falses, hits: hits };
+        save(); rerender();
+      };
+    } else if (s.type === 'write') {
+      var ww = run.work[P.pos], ta = document.getElementById('w-text'), show = document.getElementById('w-show');
+      ta.oninput = function () { ww.text = ta.value; show.disabled = wordCount(ta.value) < 3; save(); };
+      show.onclick = function () {
+        st.writings.push({ k: P.item.k, q: s.q, text: ww.text, at: new Date().toISOString() });
+        if (st.writings.length > 80) st.writings = st.writings.slice(-80);
+        run.ans[P.pos] = { wrote: 1 }; save(); rerender();
+      };
+      document.getElementById('w-skip').onclick = function () { run.ans[P.pos] = { skipped: 1 }; save(); rerender(); };
+    } else if (s.type === 'prompt') {
+      document.getElementById('pr-done').onclick = function () { if (!st.done[s.id]) st.done[s.id] = new Date().toISOString(); run.ans[P.pos] = { done: 1 }; save(); rerender(); };
+      document.getElementById('pr-later').onclick = function () { run.ans[P.pos] = { later: 1 }; save(); rerender(); };
+    }
+  }
+
+  function runSummary(run) {
+    var first = 0, firstOk = 0, fixFound = 0, fixTotal = 0, wrote = 0, misses = [];
+    run.items.forEach(function (it, pos) {
+      var a = run.ans[pos], s = resolve(it.k); if (!a || !s) return;
+      if (s.type === 'fix') { fixFound += a.found || 0; fixTotal += a.total || 0; return; }
+      if (s.type === 'write') { if (a.wrote) wrote++; return; }
+      if (it.r || a.ok == null) return;
+      first++; if (a.ok) firstOk++; else misses.push({ s: s, a: a });
+    });
+    return { first: first, firstOk: firstOk, fixFound: fixFound, fixTotal: fixTotal, wrote: wrote, misses: misses };
+  }
+  function finishRun(ctx, run) {
+    run.finished = true;
+    var sum = runSummary(run);
+    run.result = sum.firstOk + '/' + sum.first;
+    if (ctx.kind === 'lesson') {
+      var ls = st.lessons[ctx.key] || { plays: 0 };
+      ls.done = ls.done || new Date().toISOString();
+      ls.last = new Date().toISOString();
+      ls.plays = (ls.plays || 0) + 1;
+      var prevBest = ls.best ? +ls.best.split('/')[0] / Math.max(1, +ls.best.split('/')[1]) : -1;
+      if (sum.first && sum.firstOk / sum.first >= prevBest) ls.best = run.result;
+      st.lessons[ctx.key] = ls;
+    } else st.sessions = (st.sessions || 0) + 1;
+  }
+  function viewRunEnd(ctx) {
+    var run = st.runs[ctx.key];
+    if (!run || !run.finished) { location.replace(ctx.kind === 'lesson' ? ctx.base : '#/treino/surpresa'); return null; }
+    var sum = runSummary(run);
+    var out = '<div class="eyebrow">' + esc(ctx.title) + '</div><h1>' + (ctx.kind === 'lesson' ? 'Lição feita' : 'Sessão feita') + '</h1>';
+    out += '<div class="stats">' +
+      '<div class="stat"><b>' + sum.firstOk + '/' + sum.first + '</b><span>right first try</span></div>' +
+      '<div class="stat"><b>' + (sum.fixTotal ? sum.fixFound + '/' + sum.fixTotal : '–') + '</b><span>mistakes found</span></div>' +
+      '<div class="stat"><b>' + sum.wrote + '</b><span>' + (sum.wrote === 1 ? 'text written' : 'texts written') + '</span></div></div>';
+    if (ctx.kind === 'lesson') {
+      var pend = lessonPrompts(ctx.L).filter(function (id) { return !st.done[id]; });
+      if (pend.length) out += '<div class="card"><b>Redação pendente:</b> ' + pend.map(function (id) { return '<a href="#/pratica/' + id + '">' + esc(PROMPT[id].label + '. ' + PROMPT[id].title) + '</a>'; }).join(', ') + '. Write it by hand when you have ' + PROMPT[pend[0]].minutes + ' minutes.</div>';
+    }
+    if (sum.misses.length) out += '<h2>Review these</h2><div class="card">' + sum.misses.map(function (m) {
+      if (m.s.type === 'card') return missRow(m.s.card);
+      if (m.s.type === 'choice') return '<div class="miss"><div>' + md(m.s.q) + '</div><div class="pt"><b>' + md(m.s.answer) + '</b></div><small>' + md(m.s.why) + ' · you chose <em>' + esc(m.a.given) + '</em></small></div>';
+      if (m.s.type === 'order') return '<div class="miss"><div>' + md(m.s.q) + '</div><small>' + md(m.s.why) + '</small></div>';
+      return '';
+    }).join('') + '</div>';
+    out += '<div class="btn-row stretch">' + (ctx.kind === 'lesson' ? '<a class="btn primary" href="#/">Voltar à trilha</a><button class="btn" id="run-again">Refazer</button>' : '<button class="btn primary" id="run-again">Nova sessão</button><a class="btn" href="#/treino">Treino</a>') + '</div>';
+    return out;
+  }
+  function bindRunEnd(ctx) {
+    var b = document.getElementById('run-again');
+    if (b) b.onclick = function () {
+      st.runs[ctx.key] = ctx.kind === 'lesson' ? buildRun(ctx.L) : buildSurprise(); save();
+      location.hash = ctx.base + '/1';
+    };
   }
 
   /* ---------- guide ---------- */
@@ -288,7 +812,7 @@
   }
   function viewPrompt(p) {
     var g = GENRE[p.genre];
-    var out = '<div class="eyebrow">' + taskLabel(p.task) + ' · ' + (g ? esc(g.name) : '') + '</div><h1>' + esc(p.label) + '. ' + esc(p.title) + '</h1>';
+    var out = (query.de ? '<div class="btn-row" style="margin-top:0"><a class="btn small" href="#/' + esc(query.de) + '">‹ Voltar à lição</a></div>' : '') + '<div class="eyebrow">' + taskLabel(p.task) + ' · ' + (g ? esc(g.name) : '') + '</div><h1>' + esc(p.label) + '. ' + esc(p.title) + '</h1>';
     out += '<div class="timer"><span class="timer-digits" id="t-digits">' + fmt(p.minutes * 60) + '</span><button class="btn primary" id="t-start">Começar</button><button class="btn ghost" id="t-reset">Zerar</button></div>';
     if (p.task <= 2 && p.source && p.source.kind !== 'texto') out += '<p class="muted small">In the exam this is a ' + (p.source.kind === 'video' ? 'video' : 'recording') + ' played twice. Here you get the transcript: read it once, cover it, then write.</p>';
     out += '<div class="enunciado"><b>Enunciado</b>' + md(p.prompt) + '</div>';
@@ -350,23 +874,59 @@
   }
 
   /* ---------- drills ---------- */
+  /* Leitner boxes. 1: right once, back tomorrow. 2: back in 3 days. 3: the week box. 4: the month box.
+     5: right in the month box, stays for good. A right answer before the card is due keeps its box;
+     a miss sends it to 0. A card left more than a week past due slips back one box per week, never below 1. */
+  var DAY = 86400000;
+  var INTERVAL = [0, 1, 3, 7, 30];
+  var BOX_NAMES = ['', 'Acertou 1 vez', '3 dias', 'Semana', 'Mês', 'Fixada'];
   function cardState(id) { return st.cards[id] || (st.cards[id] = { box: 0, seen: 0, right: 0, wrong: 0 }); }
+  function effBox(c, now) {
+    if (!c || !c.box) return 0;
+    if (c.box >= 5 || !c.due) return c.box;
+    var late = (now || Date.now()) - Date.parse(c.due);
+    if (late <= 7 * DAY) return c.box;
+    return Math.max(1, c.box - Math.floor(late / (7 * DAY)));
+  }
+  function isDue(c, now) { return c && c.box > 0 && c.box < 5 && c.due && Date.parse(c.due) <= (now || Date.now()); }
+  (function migrate() {
+    Object.keys(st.cards).forEach(function (id) {
+      var c = st.cards[id];
+      if (c.box > 0 && !c.due) c.due = new Date(Date.parse(c.last || new Date().toISOString()) + INTERVAL[Math.min(c.box, 4)] * DAY).toISOString();
+    });
+  })();
   function modeStats(mode) {
     var ids = DRILLS.filter(function (d) { return mode === 'mix' || d.mode === mode; }).map(function (d) { return d.id; });
-    var seen = 0, right = 0, wrong = 0, mastered = 0;
-    ids.forEach(function (id) { var c = st.cards[id]; if (!c) return; seen += c.seen ? 1 : 0; right += c.right; wrong += c.wrong; if (c.box >= 3) mastered++; });
+    var seen = 0, right = 0, wrong = 0, due = 0, boxes = [0, 0, 0, 0, 0, 0], now = Date.now();
+    ids.forEach(function (id) {
+      var c = st.cards[id]; if (!c) return;
+      seen += c.seen ? 1 : 0; right += c.right; wrong += c.wrong;
+      boxes[effBox(c, now)]++;
+      if (isDue(c, now)) due++;
+    });
     var acc = right + wrong ? Math.round(100 * right / (right + wrong)) : null;
-    return { total: ids.length, seen: seen, right: right, wrong: wrong, mastered: mastered, acc: acc };
+    var learned = boxes[1] + boxes[2] + boxes[3] + boxes[4] + boxes[5];
+    return { total: ids.length, seen: seen, right: right, wrong: wrong, learned: learned, week: boxes[3], month: boxes[4], fixed: boxes[5], boxes: boxes, due: due, acc: acc };
+  }
+  function boxBar(s) {
+    var pct = function (n) { return s.total ? (100 * n / s.total).toFixed(2) : 0; };
+    return '<div class="acc-bar boxes">' + [1, 2, 3, 4, 5].map(function (b) {
+      return s.boxes[b] ? '<i class="b' + b + '" style="width:' + pct(s.boxes[b]) + '%" title="' + BOX_NAMES[b] + ': ' + s.boxes[b] + '"></i>' : '';
+    }).join('') + '</div>';
+  }
+  function boxLine(s) {
+    return s.learned + '/' + s.total + ' learned · ' + s.week + ' week · ' + (s.month + s.fixed) + ' month' + (s.due ? ' · <b>' + s.due + ' due</b>' : '');
   }
   function viewDrillHome() {
-    var out = '<div class="eyebrow">Treino</div><h1>Drills</h1><p class="lede">Rounds of ' + ROUND_SIZE + '. Cards you miss come back later in the same round, and again in future rounds until they stick.</p><div class="modes">';
+    var out = '<div class="eyebrow">Treino</div><h1>Drills</h1><p class="lede">Rounds of ' + ROUND_SIZE + '. Cards you miss come back later in the same round, and again in future rounds until they stick. </p><div class="card small box-legend"><b>How the bar fills.</b> Get a card right once and it counts. It comes back the next day, then in 3 days, then a week (the week box), then a month (the month box). Right in the month box and it stays there for good. A miss sends it back to the start, and a card left more than a week past its date slips back a box.<div class="legend-row">' + [1, 2, 3, 4, 5].map(function (b) { return '<span><i class="b' + b + '"></i>' + BOX_NAMES[b] + '</span>'; }).join('') + '</div></div>';
+    out += '<div class="modes"><a class="tile mode mix" href="#/treino/surpresa"><div><div class="tile-title">Sessão surpresa</div><div class="tile-sub">Questions, corrections, a short text and cards from the whole Trilha</div></div><div class="mode-stat">' + (st.sessions || 0) + '<small>feitas</small></div></a>';
     ['mix'].concat(MODE_ORDER).forEach(function (m) {
       var s = modeStats(m);
       var label = m === 'mix' ? 'Tudo misturado' : MODES[m].label;
-      var sub = m === 'mix' ? 'All five modes in one round' : MODES[m].en;
-      out += '<a class="tile mode' + (m === 'mix' ? ' mix' : '') + '" href="#/treino/' + m + '"><div><div class="tile-title">' + label + '</div><div class="tile-sub">' + sub + ' · ' + s.total + ' cartas</div></div>' +
-        '<div class="mode-stat">' + (s.acc == null ? '–' : s.acc + '%') + '<small>' + s.mastered + '/' + s.total + ' fixadas</small></div>' +
-        '<div class="acc-bar"><i style="width:' + (s.total ? Math.round(100 * s.mastered / s.total) : 0) + '%"></i></div></a>';
+      var sub = m === 'mix' ? 'Every mode in one round' : MODES[m].en;
+      out += '<a class="tile mode" href="#/treino/' + m + '"><div><div class="tile-title">' + label + '</div><div class="tile-sub">' + sub + '</div></div>' +
+        '<div class="mode-stat">' + (s.acc == null ? '–' : s.acc + '%') + '<small>accuracy</small></div>' +
+        boxBar(s) + '<div class="mode-foot">' + boxLine(s) + '</div></a>';
     });
     out += '</div><div class="btn-row"><a class="btn" href="#/treino/progresso">Progresso e exportar</a></div>';
     return out;
@@ -375,7 +935,9 @@
   function weight(id) {
     var c = st.cards[id];
     if (!c || !c.seen) return 3;
-    return [6, 3, 1.5, 0.6, 0.25][Math.min(c.box, 4)];
+    if (!c.box) return 6;
+    if (c.box >= 5) return 0.05;
+    return isDue(c) ? 5 : 0.3;
   }
   function buildRound(mode) {
     var pool = DRILLS.filter(function (d) { return mode === 'mix' || d.mode === mode; }).map(function (d) { return d.id; });
@@ -387,7 +949,9 @@
       for (var i = 0; i < pool.length; i++) { r -= weight(pool[i]); if (r <= 0) { pick = pool[i]; break; } }
       chosen.push(pick); pool.splice(pool.indexOf(pick), 1);
     }
-    return { mode: mode, queue: chosen, i: 0, first: {}, requeued: {}, answered: false, given: null, startedAt: new Date().toISOString() };
+    var before = {};
+    chosen.forEach(function (id) { var c = st.cards[id]; before[id] = { seen: c ? c.seen : 0, box: effBox(c) }; });
+    return { mode: mode, queue: chosen, i: 0, first: {}, requeued: {}, answered: false, given: null, before: before, startedAt: new Date().toISOString() };
   }
   function currentRound(mode) {
     if (!st.round || st.round.mode !== mode || st.round.finished) { st.round = buildRound(mode); save(); }
@@ -476,18 +1040,25 @@
       '<div class="drill-actions"><button class="btn primary" id="next">' + (R.i + 1 >= R.queue.length ? 'Ver resultado' : 'Próxima') + '</button></div>';
   }
 
-  function answer(d, R, given) {
+  function gradeCard(d, given) {
     var ok = given === (d.mode === 'acento' ? d.word : d.answer);
-    R.answered = true; R.given = given;
     var c = cardState(d.id);
     c.seen++; c.last = new Date().toISOString();
-    if (ok) { c.right++; c.box = Math.min(c.box + 1, 4); }
-    else {
-      c.wrong++; c.box = 0; c.lastWrong = given;
+    if (ok) {
+      c.right++;
+      var eb = effBox(c);
+      if (!eb || isDue(c)) { c.box = Math.min(eb + 1, 5); c.due = c.box < 5 ? new Date(Date.now() + INTERVAL[c.box] * DAY).toISOString() : null; }
+    } else {
+      c.wrong++; c.box = 0; c.due = null; c.lastWrong = given;
       st.history.push({ id: d.id, given: given, at: c.last });
       if (st.history.length > 400) st.history = st.history.slice(-400);
-      if (!R.requeued.hasOwnProperty(d.id)) { R.requeued[d.id] = R.i; R.queue.push(d.id); }
     }
+    return ok;
+  }
+  function answer(d, R, given) {
+    var ok = gradeCard(d, given);
+    R.answered = true; R.given = given;
+    if (!ok && !R.requeued.hasOwnProperty(d.id)) { R.requeued[d.id] = R.i; R.queue.push(d.id); }
     if (!R.first.hasOwnProperty(d.id)) R.first[d.id] = ok ? 1 : 0;
     save();
     app.querySelector('#drill').innerHTML = d.mode === 'acento' ? accentCard(d, R) : choiceCard(d, R);
@@ -506,22 +1077,22 @@
       if (R.i >= R.queue.length) { R.finished = true; R.showEnd = true; st.rounds++; }
       save(); route();
     };
-    if (R.answered) return;
+    bindCard(d, R, box, function (given) { answer(d, R, given); });
+  }
+  function bindCard(d, V, box, onGiven) {
+    if (V.answered) return;
     if (d.mode === 'acento') {
-      var base = strip(d.word);
       box.querySelectorAll('.tl.can').forEach(function (b) {
         b.onclick = function () { accentWork.sel = +b.dataset.i; refresh(); };
       });
-      var tray = document.getElementById('tray');
-      tray.querySelectorAll('button').forEach(function (b) {
+      box.querySelectorAll('#tray button').forEach(function (b) {
         b.onclick = function () { accentWork.chars[accentWork.sel] = b.dataset.ch; refresh(); };
       });
-      document.getElementById('acc-check').onclick = function () { answer(d, R, accentWork.chars.join('')); };
-      function refresh() { box.innerHTML = accentCard(d, R); bindDrill(R); }
-      void base;
+      box.querySelector('#acc-check').onclick = function () { onGiven(accentWork.chars.join('')); };
     } else {
-      box.querySelectorAll('.opt').forEach(function (b) { b.onclick = function () { answer(d, R, b.dataset.opt); }; });
+      box.querySelectorAll('.opt').forEach(function (b) { b.onclick = function () { onGiven(b.dataset.opt); }; });
     }
+    function refresh() { box.innerHTML = accentCard(d, V); bindCard(d, V, box, onGiven); }
   }
 
   function viewRoundEnd(R) {
@@ -529,6 +1100,18 @@
     var misses = ids.filter(function (id) { return !R.first[id]; }).map(function (id) { return DRILL[id]; }).filter(Boolean);
     var label = R.mode === 'mix' ? 'Tudo misturado' : MODES[R.mode].label;
     var out = '<div class="eyebrow">' + label + '</div><h1>Round done</h1><div class="card" style="text-align:center"><div class="score-big">' + right + '/' + ids.length + '</div><div class="muted">right on the first try</div></div>';
+    if (R.before) {
+      var learnedNow = 0, up = 0, slipped = 0;
+      ids.forEach(function (id) {
+        var b = R.before[id] || { seen: 0, box: 0 }, c = st.cards[id] || { box: 0 };
+        if (!b.box && c.box) learnedNow++;
+        else if (c.box > b.box) up++;
+        if (b.box && !c.box) slipped++;
+      });
+      var ms = modeStats(R.mode);
+      out += '<h2>What moved</h2><div class="stats"><div class="stat"><b>+' + learnedNow + '</b><span>newly learned</span></div><div class="stat"><b>' + up + '</b><span>moved up a box</span></div><div class="stat"><b>' + slipped + '</b><span>back to the start</span></div></div>';
+      out += '<div class="card small">' + label + boxBar(ms) + '<div class="mode-foot">' + boxLine(ms) + '</div></div>';
+    }
     if (misses.length) out += '<h2>Review these</h2><div class="card">' + misses.map(missRow).join('') + '</div>';
     out += '<div class="btn-row stretch"><button class="btn primary" id="again">Nova rodada</button><a class="btn" href="#/treino">Outros modos</a></div>';
     return out;
@@ -543,9 +1126,11 @@
   function viewProgress() {
     var all = modeStats('mix');
     var out = '<div class="eyebrow">Treino</div><h1>Progress</h1>';
-    out += '<div class="stats"><div class="stat"><b>' + st.rounds + '</b><span>rounds</span></div><div class="stat"><b>' + (all.acc == null ? '–' : all.acc + '%') + '</b><span>accuracy</span></div><div class="stat"><b>' + all.mastered + '</b><span>of ' + all.total + ' fixed</span></div></div>';
+    out += '<div class="stats"><div class="stat"><b>' + st.rounds + '</b><span>rounds</span></div><div class="stat"><b>' + (all.acc == null ? '–' : all.acc + '%') + '</b><span>accuracy</span></div><div class="stat"><b>' + all.learned + '</b><span>of ' + all.total + ' learned</span></div></div>' + boxBar(all) + '<p class="small muted">' + boxLine(all) + '</p>';
+    var doneL = LESSONS.filter(function (l) { return st.lessons[l.id]; }).length;
+    if (LESSONS.length) out += '<div class="card small">Trilha: <b>' + doneL + '</b> of ' + LESSONS.length + ' lessons done. ' + st.writings.length + ' short texts written.</div>';
     out += '<div class="card"><table class="bands">' + MODE_ORDER.map(function (m) {
-      var s = modeStats(m); return '<tr><td>' + MODES[m].label + '</td><td>' + (s.acc == null ? '–' : s.acc + '%') + ' · ' + s.mastered + '/' + s.total + '</td></tr>';
+      var s = modeStats(m); return '<tr><td>' + MODES[m].label + '</td><td>' + (s.acc == null ? '–' : s.acc + '%') + ' · ' + s.learned + '/' + s.total + ' learned · ' + s.week + ' week · ' + (s.month + s.fixed) + ' month</td></tr>';
     }).join('') + '</table></div>';
     var worst = DRILLS.filter(function (d) { var c = st.cards[d.id]; return c && c.wrong; })
       .sort(function (a, b) { var ca = st.cards[a.id], cb = st.cards[b.id]; return (cb.wrong - cb.right * 0.5) - (ca.wrong - ca.right * 0.5); }).slice(0, 15);
@@ -560,13 +1145,14 @@
     MODE_ORDER.forEach(function (m) { byMode[m] = modeStats(m); });
     var misses = DRILLS.filter(function (d) { var c = st.cards[d.id]; return c && c.wrong; }).map(function (d) {
       var c = st.cards[d.id];
-      return { id: d.id, mode: d.mode, item: d.mode === 'acento' ? (d.context || '').replace('___', '[' + d.word + ']') || d.word : d.prompt.replace('___', '[' + d.answer + ']'), lastWrong: c.lastWrong, wrong: c.wrong, right: c.right, box: c.box };
+      return { id: d.id, mode: d.mode, item: d.mode === 'acento' ? (d.context || '').replace('___', '[' + d.word + ']') || d.word : d.prompt.replace('___', '[' + d.answer + ']'), lastWrong: c.lastWrong, wrong: c.wrong, right: c.right, box: effBox(c) };
     }).sort(function (a, b) { return b.wrong - a.wrong; });
     var wrongAnswers = st.history.slice(-150).map(function (h) { return { id: h.id, given: h.given, at: h.at }; });
     return {
-      app: 'celpe-bras-prep', version: 1, exportedAt: new Date().toISOString(),
-      rounds: st.rounds, overall: modeStats('mix'), byMode: byMode,
-      practiceDone: st.done, misses: misses, recentWrongAnswers: wrongAnswers
+      app: 'celpe-bras-prep', version: 2, exportedAt: new Date().toISOString(),
+      rounds: st.rounds, sessions: st.sessions || 0, overall: modeStats('mix'), byMode: byMode,
+      lessons: st.lessons, practiceDone: st.done, misses: misses, recentWrongAnswers: wrongAnswers,
+      lessonMisses: st.lessonMisses.slice(-80), writings: st.writings.slice(-40)
     };
   }
   function bindProgress() {
@@ -590,12 +1176,19 @@
     };
     document.getElementById('reset').onclick = function () {
       if (!confirm('Apagar todo o progresso deste aparelho?')) return;
-      st = { cards: {}, done: {}, history: [], rounds: 0 }; save(); route();
+      st = { cards: {}, done: {}, history: [], rounds: 0, lessons: {}, runs: {}, writings: [], lessonMisses: [] }; save(); route();
     };
   }
 
   /* ---------- bind per view ---------- */
   function bind(sec, parts) {
+    if (!sec) bindPath();
+    if (sec === 'trilha' && LESSON[parts[1]]) {
+      if (!parts[2]) bindLessonIntro(LESSON[parts[1]]);
+      else if (parts[2] === 'fim') bindRunEnd(lessonCtx(LESSON[parts[1]]));
+      else if (player) bindStep();
+    }
+    if (sec === 'treino' && parts[1] === 'surpresa') { if (parts[2] === 'fim') bindRunEnd(surpriseCtx()); else if (player) bindStep(); return; }
     if (sec === 'guia' && TASK[parts[1]]) bindSample(TASK[parts[1]].sample);
     if (sec === 'guia' && GENRE[parts[1]]) bindSample(GENRE[parts[1]].sample);
     if (sec === 'pratica' && PROMPT[parts[1]]) bindPrompt(PROMPT[parts[1]]);
