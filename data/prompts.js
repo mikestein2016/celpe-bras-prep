@@ -2,29 +2,33 @@ window.CB = window.CB || {};
 CB.prompts = CB.prompts || [];
 CB.prompts.push(
   {
-    id: "a-celular",
+    id: "a-brecho",
     label: "A",
-    title: "Celular na escola",
-    genre: "solicitacao",
+    title: "A moda dos brechós",
+    genre: "blog",
     task: 1,
     minutes: 30,
     source: {
-      kind: "texto",
-      title: "Celular fora da sala de aula",
+      kind: "video",
+      title: "Reportagem do telejornal local",
       body: [
-        "Desde 2025, uma lei federal restringe o uso de celulares nas escolas de educação básica em todo o Brasil, públicas e privadas. Os alunos não podem usar o aparelho durante as aulas nem no recreio. Há exceções: o celular pode ser usado com fins pedagógicos, com orientação do professor, e por alunos que precisam dele por motivos de saúde ou acessibilidade.",
-        "Muitos professores dizem que os alunos estão mais atentos e conversam mais entre si no intervalo. Alguns pais, porém, têm dúvidas: como falar com os filhos em uma emergência? E o que as crianças vão fazer no recreio sem o celular? Algumas escolas responderam com atividades no intervalo, como jogos de tabuleiro, esportes e biblioteca aberta."
+        "Apresentadora: Roupa usada virou moda. Os brechós, que antes muita gente evitava, agora têm fila na porta, principalmente de jovens. A repórter Paula Mendes foi conferir.",
+        "Repórter: Neste brechó no centro da cidade, as araras estão cheias de calças jeans, jaquetas e vestidos. Tudo usado, e tudo com preço bem abaixo do de uma loja comum.",
+        "Beatriz, 19 anos, estudante: Eu comprei essa jaqueta aqui por trinta e cinco reais. Nova, numa loja do shopping, ia custar uns duzentos. E ninguém vai ter uma igual, né? Isso eu acho o máximo.",
+        "Repórter: Além do preço, pesa a preocupação com o meio ambiente. A indústria da moda usa muita água e produz muito resíduo, e cada peça que volta a ser usada deixa de ir para o lixo.",
+        "Seu Jorge, dono do brechó: Quando eu abri, há dez anos, vinha mais gente mais velha procurando coisa barata. Hoje metade dos meus clientes tem menos de trinta anos. E muita gente vem vender também: a pessoa traz a roupa que não usa mais e sai com crédito pra comprar outra.",
+        "Repórter: Para quem nunca comprou em brechó, a dica dos frequentadores é ir sem pressa, olhar com atenção as costuras e os botões e sempre experimentar, porque o tamanho pode variar. E, claro, lavar a peça antes de usar."
       ],
       note: "Stands in for a video: read it once, cover it, then write."
     },
-    prompt: "Você é pai de um aluno do ensino fundamental. Antes de uma reunião sobre o tema, a escola pediu sugestões às famílias. Escreva um e-mail à coordenação pedagógica: diga sua posição sobre a lei, apresente uma preocupação e sugira duas atividades para o recreio.",
+    prompt: "Você escreve para o Vida Simples, um blog sobre consumo consciente. Com base na reportagem, escreva um post para o blog apresentando o crescimento dos brechós, explicando por que comprar roupas usadas vale a pena e dando dicas para quem nunca comprou em um brechó.",
     checklist: [
-      "Formal e-mail format with an *assunto* line, a vocativo to the coordination (*Prezada coordenação*), a closing such as *Atenciosamente* and a signature by role (*pai de aluno do 5º ano*), not a real name.",
-      "Identifies the writer as a parent answering the school's request for suggestions before the meeting.",
-      "States a clear position on the law (for, against, or in favor with reservations).",
-      "Presents one concrete concern, such as reaching the child in an emergency or what children will do at recess without phones.",
-      "Suggests two recess activities as polite proposals (*sugiro que*, *seria interessante*), from the school examples (board games, sports, open library) or the writer's own ideas.",
-      "Reuses source facts in new words (federal law since 2025, exceptions for teaching use and for health or accessibility needs) without mentioning a video; formal register addressed to the school staff."
+      "Blog post format: a title that catches attention, short paragraphs or a short list of tips, direct address to the reader as *você*, and a closing that invites the reader to act or comment.",
+      "Written by the blogger for readers interested in conscious consumption, with no mention of a video or TV report.",
+      "Presents the trend with facts in new words: second-hand shops now draw lines of young people, and the owner says half his customers are under thirty, while ten years ago they were mostly older people.",
+      "Explains why it is worth it: much lower prices (a jacket for about R$ 35 instead of about R$ 200), unique pieces, and less waste from an industry that uses a lot of water. Mentions that you can also sell clothes for store credit.",
+      "Gives practical tips: go without hurry, check seams and buttons, always try things on because sizes vary, wash before wearing.",
+      "Spoken marks converted to writing (no *né*, *pra*, *ia custar*, *acho o máximo*); warm semi-formal register with imperatives in the *você* form (*experimente*, *lave*)."
     ]
   },
   {
