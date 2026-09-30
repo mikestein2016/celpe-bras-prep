@@ -448,6 +448,7 @@ CB.lessons.push(
         ]
       },
       { type: 'drills', modes: ['registro'], n: 8 },
+      { type: 'formal', n: 2 },
       { type: 'drills', modes: ['genero'], n: 3 }
     ]
   },

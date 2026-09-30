@@ -38,7 +38,7 @@ for (const [id, m] of Object.entries(models)) {
   for (const u of used) if (!(m.notes || []).some(n => n.n === u)) bad.push('model ' + id + ' marker ' + u + ' has no note');
   if (/segundo o (texto|vídeo|áudio)|no vídeo|no áudio|a reportagem mostrou/i.test(text) && !/resumo|carta/.test((prompts.find(p => p.id === id) || {}).genre || '')) warn.push('model ' + id + ' may mention the source');
 }
-const TYPES = new Set(['teach', 'choice', 'fix', 'order', 'write', 'drills', 'pick', 'prompt']);
+const TYPES = new Set(['teach', 'choice', 'fix', 'order', 'write', 'drills', 'pick', 'prompt', 'dictation', 'formal']);
 const FIX = /\{\{([^|{}]+)\|([^|{}]*)\|([^{}]*)\}\}/g;
 const ns = {};
 function checkStep(s, where) {
@@ -72,6 +72,18 @@ function checkStep(s, where) {
     else s.from.forEach((x, i) => checkStep(x, where + '.from[' + i + ']'));
   }
 }
+// Passe para o formal: every change must be findable in both sentences.
+const fids = {};
+for (const f of CB.formal || []) {
+  if (fids[f.id]) bad.push('duplicate formal id ' + f.id); fids[f.id] = 1;
+  for (const k of ['context', 'informal', 'formal', 'changes']) if (!f[k]) bad.push(f.id + ' missing ' + k);
+  for (const c of f.changes || []) {
+    if (!String(f.informal).includes(c.from)) bad.push(f.id + ' change from not in informal: ' + c.from);
+    if (!String(f.formal).includes(c.to)) bad.push(f.id + ' change to not in formal: ' + c.to);
+    if (!c.why) bad.push(f.id + ' change without why');
+  }
+}
+if (!(CB.formal || []).length) warn.push('no formal items loaded');
 const lids = {};
 for (const L of lessons) {
   if (lids[L.id]) bad.push('duplicate lesson ' + L.id); lids[L.id] = 1;

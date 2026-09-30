@@ -9,6 +9,7 @@
   var OV = CB.overview || {};
   var MODELS = CB.models || {};
   var OPEN = CB.openings || null;
+  var FORMAL = CB.formal || [];
   var LESSONS = (CB.lessons || []).slice().sort(function (a, b) { return a.n - b.n; });
   var UNITS = { 1: 'Ler a proposta', 2: 'Usar a fonte', 3: 'Coesão', 4: 'Seus erros de língua', 5: 'Revisar e simular' };
 
@@ -40,6 +41,12 @@
   };
 
   var app = document.getElementById('app');
+  (function trackTopbar() {
+    var tb = document.querySelector('.topbar');
+    var set = function () { document.documentElement.style.setProperty('--tb-h', (tb ? tb.offsetHeight : 60) + 'px'); };
+    set(); window.addEventListener('resize', set);
+    if (window.ResizeObserver && tb) new ResizeObserver(set).observe(tb);
+  })();
   var byId = function (list) { var m = {}; list.forEach(function (x) { m[x.id] = x; }); return m; };
   var GENRE = byId(GENRES), TASK = byId(TASKS), PROMPT = byId(PROMPTS), DRILL = byId(DRILLS), LESSON = byId(LESSONS);
 
@@ -56,6 +63,7 @@
   st.runs = st.runs || {};
   st.writings = st.writings || [];
   st.lessonMisses = st.lessonMisses || [];
+  st.days = st.days || {};
   function save() { try { localStorage.setItem(KEY, JSON.stringify(st)); } catch (e) { /* private mode: keep in memory */ } }
 
   /* ---------- text helpers ---------- */
@@ -117,8 +125,8 @@
     else if (sec === 'trilha' && LESSON[parts[1]] && !parts[2]) html = viewLessonIntro(LESSON[parts[1]]);
     else if (sec === 'trilha' && LESSON[parts[1]] && parts[2] === 'fim') html = viewRunEnd(lessonCtx(LESSON[parts[1]]));
     else if (sec === 'trilha' && LESSON[parts[1]]) html = viewPlayer(lessonCtx(LESSON[parts[1]]), parseInt(parts[2], 10));
-    else if (sec === 'treino' && parts[1] === 'surpresa' && parts[2] === 'fim') html = viewRunEnd(surpriseCtx());
-    else if (sec === 'treino' && parts[1] === 'surpresa') html = viewSurprise(parts[2]);
+    else if (sec === 'treino' && GEN[parts[1]] && parts[2] === 'fim') html = viewRunEnd(genCtx(parts[1]));
+    else if (sec === 'treino' && GEN[parts[1]]) html = viewGenerated(parts[1], parts[2]);
     else if (sec === 'guia' && !parts[1]) html = viewGuide();
     else if (sec === 'guia' && parts[1] === 'aberturas' && OPEN) html = viewOpenings();
     else if (sec === 'guia' && TASK[parts[1]]) html = viewTask(TASK[parts[1]]);
@@ -127,7 +135,7 @@
     else if (sec === 'pratica' && PROMPT[parts[1]]) html = viewPrompt(PROMPT[parts[1]]);
     else if (sec === 'treino' && !parts[1]) html = viewDrillHome();
     else if (sec === 'treino' && parts[1] === 'progresso') html = viewProgress();
-    else if (sec === 'treino' && (parts[1] === 'mix' || MODES[parts[1]])) html = viewRound(parts[1]);
+    else if (sec === 'treino' && (parts[1] === 'mix' || parts[1] === 'revisao' || MODES[parts[1]])) html = viewRound(parts[1]);
     else html = '<h1>Página não encontrada</h1><p><a href="#/">Voltar ao início</a></p>';
     if (html == null) return;
     app.innerHTML = html;
@@ -156,9 +164,11 @@
     var d = daysLeft();
     if (!left) return 'Trilha completa. Keep going with a Sessão surpresa every day and one handwritten prompt.';
     if (d <= 0) return '';
-    var days = Math.max(1, d - 1);
-    if (left <= days) return left + (left === 1 ? ' lesson' : ' lessons') + ' left and ' + days + (days === 1 ? ' day' : ' days') + ' before the exam. One a day gets you there.';
-    return left + ' lessons left and ' + days + (days === 1 ? ' day' : ' days') + ' before the exam. Do ' + Math.ceil(left / days) + ' a day to finish on time.';
+    // Days to study, counting today, up to the eve of the exam.
+    var days = Math.max(1, d);
+    var lead = left + (left === 1 ? ' lesson' : ' lessons') + ' left and ' + days + (days === 1 ? ' day' : ' days') + ' to study, counting today.';
+    if (left <= days) return lead + ' One a day gets you there.';
+    return lead + ' Do ' + Math.ceil(left / days) + ' a day to finish on time.';
   }
   function viewPath() {
     var d = daysLeft();
@@ -166,6 +176,7 @@
     var cur = nextLesson();
     var out = '<div class="eyebrow">Trilha</div><h1>Celpe-Bras: Parte Escrita</h1>';
     if (d > 0) out += '<div class="countdown"><b>' + d + '</b><span>' + (d === 1 ? 'dia' : 'dias') + ' até a Parte Escrita, 20 de outubro às 9h</span></div>';
+    out += todayStrip();
     if (!LESSONS.length) return out + '<p class="empty">No lessons loaded.</p>';
     out += '<div class="path-top"><div class="path-count"><b>' + doneN + '</b> de ' + LESSONS.length + ' lições</div><div class="progress"><i style="width:' + Math.round(100 * doneN / LESSONS.length) + '%"></i></div><p class="small muted" style="margin:0">' + esc(paceLine(LESSONS.length - doneN)) + '</p></div>';
     var unit = null;
@@ -258,6 +269,8 @@
   function expand(step, key, taken, items) {
     if (!step) return;
     if (step.type === 'drills') { drawCards(step, taken).forEach(function (id) { items.push({ k: 'D:' + id }); }); return; }
+    if (step.type === 'dictation') { drawDictation(step.n || 2, step.modes, taken).forEach(function (id) { items.push({ k: 'T:' + id }); }); return; }
+    if (step.type === 'formal') { drawFormal(step.n || 2, taken).forEach(function (id) { items.push({ k: 'F:' + id }); }); return; }
     if (step.type === 'pick') {
       var idx = shuffle(step.from.map(function (_, i) { return i; })).slice(0, step.n).sort(function (a, b) { return a - b; });
       idx.forEach(function (i) { expand(step.from[i], key + ':' + i, taken, items); });
@@ -273,9 +286,13 @@
   function resolve(k) {
     var p = k.split(':');
     if (p[0] === 'D') { var d = DRILL[p[1]]; return d ? { type: 'card', card: d } : null; }
+    if (p[0] === 'T') { var t = DRILL[p[1]], txt = t && dictText(t); return txt ? { type: 'dict', card: t, text: txt } : null; }
+    if (p[0] === 'F') { var f = FORMAL_BY[p[1]]; return f ? { type: 'formal', item: f } : null; }
     var L = LESSON[p[1]]; if (!L) return null;
     var s = L.steps[+p[2]];
     for (var i = 3; i < p.length && s; i++) s = s.from && s.from[+p[i]];
+    // drills, dictation and formal steps are expanded into their own items when a run is built.
+    if (s && (s.type === 'drills' || s.type === 'dictation' || s.type === 'formal' || s.type === 'pick')) return null;
     return s || null;
   }
   function allAtoms() {
@@ -301,34 +318,229 @@
       return shuffle(pool).slice(0, n).map(function (a) { return { k: a.k }; });
     }
     var cards = drawCards({ n: 5 }, taken).map(function (id) { return { k: 'D:' + id }; });
-    items = shuffle(take('choice', 3).concat(take('order', 1), cards.slice(0, 3)));
-    items = items.concat(take('fix', 1), cards.slice(3), take('write', 1));
+    var dict = drawDictation(1, null, taken).map(function (id) { return { k: 'T:' + id }; });
+    var formal = drawFormal(1, taken).map(function (id) { return { k: 'F:' + id }; });
+    items = shuffle(take('choice', 3).concat(take('order', 1), cards.slice(0, 3), dict));
+    items = items.concat(take('fix', 1), cards.slice(3), formal, take('write', 1));
     return { items: items, i: 0, ans: {}, retried: {}, started: new Date().toISOString() };
   }
+  function newRun(items) { return { items: items, i: 0, ans: {}, retried: {}, started: new Date().toISOString() }; }
+  var GEN = {
+    surpresa: { title: 'Sessão surpresa', build: buildSurprise },
+    ditado: { title: 'Ditado', build: function () { return newRun(drawDictation(8, null, {}).map(function (id) { return { k: 'T:' + id }; })); } },
+    formal: { title: 'Passe para o formal', build: function () { return newRun(drawFormal(6, {}).map(function (id) { return { k: 'F:' + id }; })); } }
+  };
+  if (!FORMAL.length) delete GEN.formal;
   function lessonCtx(L) {
     return { kind: 'lesson', L: L, key: L.id, base: '#/trilha/' + L.id, title: 'Lição ' + L.n + ' · ' + L.title, exit: '#/' };
   }
-  function surpriseCtx() {
-    return { kind: 'surpresa', key: 'surpresa', base: '#/treino/surpresa', title: 'Sessão surpresa', exit: '#/treino' };
+  function genCtx(kind) {
+    return { kind: kind, key: kind, base: '#/treino/' + kind, title: GEN[kind].title, exit: '#/treino' };
   }
-  function viewSurprise(k) {
-    var run = st.runs.surpresa;
-    if (!run || run.finished || !run.items.length) { st.runs.surpresa = buildSurprise(); save(); location.replace('#/treino/surpresa/1'); return null; }
-    if (!k) { location.replace('#/treino/surpresa/' + (run.i + 1)); return null; }
-    return viewPlayer(surpriseCtx(), parseInt(k, 10));
+  function viewGenerated(kind, k) {
+    var run = st.runs[kind];
+    if (!run || run.finished || !run.items.length) { st.runs[kind] = GEN[kind].build(); save(); location.replace('#/treino/' + kind + '/1'); return null; }
+    if (!k) { location.replace('#/treino/' + kind + '/' + (run.i + 1)); return null; }
+    return viewPlayer(genCtx(kind), parseInt(k, 10));
+  }
+
+  /* ---------- ditado and passe para o formal ---------- */
+  var FORMAL_BY = byId(FORMAL);
+  // A dictation sentence is a drill card's sentence with its answer filled in:
+  // short, already proofread, and built around one of his error patterns.
+  function dictText(d) {
+    if (!d || d.mode === 'abertura') return null;
+    var s = d.mode === 'acento' ? (d.context ? d.context.replace('___', d.word) : null)
+      : String(d.prompt).replace('___', d.answer === '(nada)' ? '' : d.answer);
+    if (!s) return null;
+    s = s.replace(/\s+/g, ' ').replace(/\s+([,.;:!?])/g, '$1').trim();
+    var n = s.split(' ').length;
+    if (n < 4 || n > 18 || !/[.!?]$/.test(s)) return null;
+    return s.charAt(0).toUpperCase() + s.slice(1);
+  }
+  function drawDictation(n, modes, taken) {
+    var pool = DRILLS.filter(function (d) { return !taken['T' + d.id] && (!modes || modes.indexOf(d.mode) >= 0) && dictText(d); }).map(function (d) { return d.id; });
+    var out = [];
+    while (out.length < n && pool.length) {
+      var tot = 0; pool.forEach(function (id) { tot += weight(id); });
+      var r = Math.random() * tot, pick = pool[pool.length - 1];
+      for (var i = 0; i < pool.length; i++) { r -= weight(pool[i]); if (r <= 0) { pick = pool[i]; break; } }
+      out.push(pick); taken['T' + pick] = 1; pool.splice(pool.indexOf(pick), 1);
+    }
+    return out;
+  }
+  function drawFormal(n, taken) {
+    var seen = st.formalSeen || {};
+    var pool = FORMAL.filter(function (f) { return !taken['F' + f.id]; });
+    pool = shuffle(pool).sort(function (a, b) { return (seen[a.id] || 0) - (seen[b.id] || 0); });
+    return pool.slice(0, n).map(function (f) { taken['F' + f.id] = 1; return f.id; });
+  }
+
+  // Speech: the device's own Brazilian Portuguese voice.
+  var ptVoice = null;
+  function pickVoice() {
+    if (!('speechSynthesis' in window)) return;
+    var vs = window.speechSynthesis.getVoices() || [];
+    ptVoice = vs.filter(function (v) { return /^pt[-_]BR/i.test(v.lang); })[0] || vs.filter(function (v) { return /^pt/i.test(v.lang); })[0] || null;
+  }
+  if ('speechSynthesis' in window) { pickVoice(); window.speechSynthesis.onvoiceschanged = pickVoice; }
+  function speak(text, rate) {
+    if (!('speechSynthesis' in window)) return;
+    var u = new SpeechSynthesisUtterance(text);
+    u.lang = 'pt-BR'; u.rate = rate || 0.95;
+    if (ptVoice) u.voice = ptVoice;
+    window.speechSynthesis.cancel();
+    window.speechSynthesis.speak(u);
+  }
+
+  // Word-by-word comparison. Aligns on words that match once accents are
+  // stripped, so a missing accent reads as "acento" rather than a wrong word.
+  function words(s) {
+    return String(s || '').replace(/[“”"«»]/g, ' ').split(/\s+/).map(function (w) {
+      return w.replace(/^[^0-9A-Za-zÀ-ÿ]+|[^0-9A-Za-zÀ-ÿ]+$/g, '');
+    }).filter(Boolean);
+  }
+  function diffWords(target, typed) {
+    var T = words(target), Y = words(typed);
+    var lo = function (w) { return w.toLowerCase(); }, loose = function (w) { return strip(w).toLowerCase(); };
+    var n = T.length, m = Y.length, L = [];
+    for (var i = 0; i <= n; i++) { L.push(new Array(m + 1).fill(0)); }
+    for (i = n - 1; i >= 0; i--) for (var j = m - 1; j >= 0; j--) L[i][j] = loose(T[i]) === loose(Y[j]) ? L[i + 1][j + 1] + 1 : Math.max(L[i + 1][j], L[i][j + 1]);
+    var out = [], extra = [], pendT = [];
+    i = 0; j = 0;
+    function flush() {
+      // Unmatched target words and unmatched typed words between two anchors pair up as substitutions.
+      pendT.forEach(function (t, k) { out.push(extra[k] != null ? { t: t, y: extra[k], s: 'wrong' } : { t: t, y: null, s: 'missing' }); });
+      for (var k = pendT.length; k < extra.length; k++) out.push({ t: null, y: extra[k], s: 'extra' });
+      pendT = []; extra = [];
+    }
+    while (i < n || j < m) {
+      if (i < n && j < m && loose(T[i]) === loose(Y[j])) {
+        flush();
+        out.push({ t: T[i], y: Y[j], s: lo(T[i]) === lo(Y[j]) ? 'ok' : 'accent' });
+        i++; j++;
+      } else if (j < m && (i >= n || L[i][j + 1] >= L[i + 1][j])) { extra.push(Y[j]); j++; }
+      else { pendT.push(T[i]); i++; }
+    }
+    flush();
+    var ok = out.every(function (x) { return x.s === 'ok'; });
+    return { parts: out, ok: ok, right: out.filter(function (x) { return x.s === 'ok'; }).length, total: T.length };
+  }
+
+  function dictHtml(s, a) {
+    var run = player.run;
+    run.work = run.work || {};
+    var w = run.work[player.pos] || (run.work[player.pos] = { text: '', plays: 0 });
+    var out = '<div class="step-card left"><div class="mode-tag">' + againNote() + 'Ditado</div>';
+    out += '<div class="q">Listen, then type exactly what you hear. Autocorrect is off.</div>';
+    // A voice list that has not loaded yet still speaks with lang pt-BR.
+    var speechOk = 'speechSynthesis' in window && (!!ptVoice || !window.speechSynthesis.getVoices().length);
+    if (speechOk) {
+      out += '<div class="btn-row"><button class="btn primary" id="d-play">Ouvir</button><button class="btn" id="d-slow">Mais devagar</button></div>';
+    } else {
+      out += '<p class="small muted">This device has no Portuguese voice, so the sentence shows for four seconds instead. Read it once, then type it from memory.</p><div class="btn-row"><button class="btn primary" id="d-peek">Mostrar a frase</button></div><div class="passage pt" id="d-peekbox" hidden></div>';
+    }
+    out += '<textarea id="d-text" class="write pt" rows="3" autocomplete="off" autocorrect="off" autocapitalize="sentences" spellcheck="false" lang="pt-BR" placeholder="Escreva o que ouviu."' + (a ? ' readonly' : '') + '>' + esc(w.text) + '</textarea>';
+    if (!a) {
+      out += '<div class="drill-actions"><button class="btn primary" id="d-check"' + (wordCount(w.text) < 2 ? ' disabled' : '') + '>Verificar</button></div>';
+    } else {
+      var D = a.diff;
+      out += '<div class="dict-result pt">' + D.parts.map(function (x) {
+        if (x.s === 'ok') return '<span class="dw ok">' + esc(x.t) + '</span>';
+        if (x.s === 'accent') return '<span class="dw acc" title="accent">' + esc(x.t) + '<small>' + esc(x.y) + '</small></span>';
+        if (x.s === 'wrong') return '<span class="dw bad">' + esc(x.t) + '<small>' + esc(x.y) + '</small></span>';
+        if (x.s === 'missing') return '<span class="dw miss">' + esc(x.t) + '<small>faltou</small></span>';
+        return '<span class="dw extra"><small>' + esc(x.y) + '</small></span>';
+      }).join(' ') + '</div>';
+      var accents = D.parts.filter(function (x) { return x.s === 'accent'; }).length;
+      out += '<div class="feedback ' + (D.ok ? 'good' : 'bad') + '"><b>' + (D.ok ? 'Perfeito!' : D.right + ' of ' + D.total + ' words exact.') + '</b>' +
+        (!D.ok ? '<p style="margin:0 0 .4em">' + (accents ? accents + (accents === 1 ? ' word needs' : ' words need') + ' an accent fix. ' : '') + 'The small text under a word is what you typed.</p>' : '') +
+        '<div class="pt" style="margin:.2em 0 .5em"><b>' + esc(s.text) + '</b></div>' +
+        (s.card && s.card.rule ? '<div class="small">' + md(s.card.rule) + '</div>' : '') +
+        (a.retry ? '<div class="again">This one comes back before the end.</div>' : '') + '</div>';
+      out += '<div class="btn-row"><button class="btn ghost small" id="d-play">Ouvir de novo</button></div>';
+    }
+    out += '</div>';
+    return out + (a ? nextBtn() : '');
+  }
+
+  function normFormal(t) { return ' ' + String(t || '').toLowerCase().replace(/[“”"«»,.;:!?()]/g, ' ').replace(/\s+/g, ' ').trim() + ' '; }
+  function formalChecks(f, text) {
+    var T = normFormal(text), Tl = strip(T);
+    return (f.changes || []).map(function (c) {
+      var to = normFormal(c.to), from = normFormal(c.from);
+      var found = T.indexOf(to) >= 0;
+      var looseFound = !found && Tl.indexOf(strip(to)) >= 0;
+      var fromLeft = from.trim() && T.indexOf(from) >= 0;
+      return { c: c, found: found, loose: looseFound, fromLeft: fromLeft };
+    });
+  }
+  function formalHtml(s, a) {
+    var f = s.item, run = player.run;
+    run.work = run.work || {};
+    var w = run.work[player.pos] || (run.work[player.pos] = { text: f.informal });
+    var out = '<div class="step-card left"><div class="mode-tag">' + againNote() + 'Passe para o formal</div>';
+    out += '<div class="tile-meta" style="margin:0 0 8px"><span class="chip accent">' + esc(f.context) + '</span></div>';
+    out += '<div class="q">Rewrite it the way this text should say it. Edit the sentence below.</div>';
+    out += '<div class="passage pt said">“' + esc(f.informal) + '”</div>';
+    out += '<textarea id="f-text" class="write pt" rows="4" autocomplete="off" autocorrect="off" autocapitalize="sentences" spellcheck="false" lang="pt-BR"' + (a ? ' readonly' : '') + '>' + esc(w.text) + '</textarea>';
+    if (!a) {
+      out += '<div class="drill-actions"><button class="btn primary" id="f-check">Verificar</button></div>';
+    } else {
+      var C = a.checks;
+      var hits = C.filter(function (x) { return x.found; }).length;
+      out += '<div class="feedback ' + (hits === C.length ? 'good' : 'bad') + '"><b>' + (hits === C.length ? 'Todas as mudanças!' : hits + ' of ' + C.length + ' key changes found.') + '</b>' +
+        '<ul class="fchecks">' + C.map(function (x) {
+          return '<li class="' + (x.found ? 'hit' : 'miss') + '"><span class="pt"><s>' + esc(x.c.from) + '</s> → <b>' + esc(x.c.to) + '</b></span>' +
+            (x.loose ? ' <span class="chip warn">sem acento</span>' : '') + '<div class="small">' + md(x.c.why) + '</div></li>';
+        }).join('') + '</ul>' +
+        (hits < C.length ? '<p class="small" style="margin:.4em 0 0">A different wording can be right too. Compare yours with the model.</p>' : '') +
+        (a.retry ? '<div class="again">This one comes back before the end.</div>' : '') + '</div>';
+      var model = esc(f.formal);
+      (f.changes || []).forEach(function (c) { var t = esc(c.to); if (t) model = model.split(t).join('<mark class="fm">' + t + '</mark>'); });
+      out += '<h3>Modelo</h3><div class="paper"><p>' + model + '</p></div>';
+    }
+    out += '</div>';
+    return out + (a ? nextBtn() : '');
+  }
+
+  /* ---------- today: streak and review ---------- */
+  function dayKey(d) { d = d || new Date(); return d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + ('0' + d.getDate()).slice(-2); }
+  function logActivity() { var k = dayKey(); st.days[k] = (st.days[k] || 0) + 1; }
+  (function seedDays() {
+    if (Object.keys(st.days).length) return;
+    Object.keys(st.cards).forEach(function (id) { var c = st.cards[id]; if (c.last) { var k = dayKey(new Date(c.last)); st.days[k] = (st.days[k] || 0) + 1; } });
+  })();
+  function streakDays() {
+    var d = new Date(), n = 0;
+    if (!st.days[dayKey(d)]) d.setDate(d.getDate() - 1);
+    while (st.days[dayKey(d)]) { n++; d.setDate(d.getDate() - 1); }
+    return n;
+  }
+  function reviewIds() {
+    var now = Date.now();
+    return DRILLS.filter(function (d) { var c = st.cards[d.id]; return c && c.seen && (!c.box || isDue(c, now)); }).map(function (d) { return d.id; });
+  }
+  function todayStrip() {
+    var sd = streakDays(), today = !!st.days[dayKey()], due = reviewIds().length;
+    var streakTxt = sd ? '<b>' + sd + '</b> ' + (sd === 1 ? 'dia seguido' : 'dias seguidos') : 'Comece a sequência hoje';
+    var note = today ? '' : (sd ? ' · pratique hoje para não perder' : '');
+    return '<div class="today"><div class="today-l"><div class="today-streak">' + streakTxt + '<span class="muted small">' + note + '</span></div>' +
+      '<div class="small muted">' + (due ? due + (due === 1 ? ' carta para revisar hoje' : ' cartas para revisar hoje') : 'Nada para revisar hoje') + '</div></div>' +
+      (due ? '<a class="btn small primary" href="#/treino/revisao">Revisar</a>' : '') + '</div>';
   }
 
   /* player */
   var player = null;
   function viewPlayer(ctx, k) {
     var run = st.runs[ctx.key];
-    if (!run) { location.replace(ctx.kind === 'lesson' ? ctx.base : '#/treino/surpresa'); return null; }
+    if (!run) { location.replace(ctx.base); return null; }
     if (run.finished && k > run.items.length) { location.replace(ctx.base + '/fim'); return null; }
     if (!(k >= 1) || k > run.i + 1 || k > run.items.length) { location.replace(ctx.base + '/' + Math.min(run.i + 1, run.items.length)); return null; }
     var pos = k - 1, item = run.items[pos], step = resolve(item.k);
     player = { ctx: ctx, run: run, pos: pos, item: item, step: step };
-    var out = '<div class="round-head"><div class="eyebrow" style="margin:0">' + esc(ctx.title) + '</div><a class="small muted" href="' + ctx.exit + '">Sair</a></div>';
-    out += '<div class="progress" title="' + k + ' de ' + run.items.length + '"><i style="width:' + Math.round(100 * pos / run.items.length) + '%"></i></div>';
+    var out = '<div class="run-head"><div class="round-head"><div class="eyebrow" style="margin:0">' + esc(ctx.title) + '</div><a class="small muted" href="' + ctx.exit + '">Sair</a></div>';
+    out += '<div class="progress" title="' + k + ' de ' + run.items.length + '"><i style="width:' + Math.round(100 * pos / run.items.length) + '%"></i></div></div>';
     out += '<div class="step" id="step">' + stepHtml() + '</div>';
     return out;
   }
@@ -348,6 +560,8 @@
       case 'fix': return fixHtml(s, a);
       case 'write': return writeHtml(s, a);
       case 'prompt': return promptStepHtml(s, a);
+      case 'dict': return dictHtml(s, a);
+      case 'formal': return formalHtml(s, a);
     }
     return '<p class="empty">Unknown step.</p>' + nextBtn();
   }
@@ -518,6 +732,7 @@
   function settle(ok, extra) {
     var run = player.run, a = extra || {};
     a.ok = ok;
+    if (player.step && player.step.type !== 'card') logActivity();
     if (!ok && !player.item.r && !run.retried[player.item.k]) { run.retried[player.item.k] = 1; run.items.push({ k: player.item.k, r: 1 }); a.retry = true; }
     run.ans[player.pos] = a;
     save();
@@ -542,6 +757,7 @@
           b.onclick = function () { var e = P2.errs[+b.dataset.e]; openSheet('<div class="note-cat">' + (+b.dataset.e + 1) + ' · ' + esc(e.wrong) + ' → ' + esc(e.right) + '</div><p style="margin:.4em 0 0">' + md(e.why) + '</p>'); };
         });
       }
+      if (s.type === 'dict') { var rp = document.getElementById('d-play'); if (rp) rp.onclick = function () { speak(s.text, 0.95); }; }
       if (s.type === 'write') app.querySelectorAll('.selfcheck input').forEach(function (cb) {
         cb.onchange = function () { run.work[P.pos].checks[cb.dataset.c] = cb.checked; save(); };
       });
@@ -581,6 +797,7 @@
         });
         if (found < PF.errs.length) recordMiss('fix', s, PF.errs.filter(function (_, i) { return !hits[i]; }).map(function (e) { return e.wrong; }).join(' | '));
         run.ans[P.pos] = { ok: found === PF.errs.length, found: found, total: PF.errs.length, falses: falses, hits: hits };
+        logActivity();
         save(); rerender();
       };
     } else if (s.type === 'write') {
@@ -589,9 +806,38 @@
       show.onclick = function () {
         st.writings.push({ k: P.item.k, q: s.q, text: ww.text, at: new Date().toISOString() });
         if (st.writings.length > 80) st.writings = st.writings.slice(-80);
-        run.ans[P.pos] = { wrote: 1 }; save(); rerender();
+        run.ans[P.pos] = { wrote: 1 }; logActivity(); save(); rerender();
       };
       document.getElementById('w-skip').onclick = function () { run.ans[P.pos] = { skipped: 1 }; save(); rerender(); };
+    } else if (s.type === 'dict') {
+      var dw = run.work[P.pos], dta = document.getElementById('d-text'), dchk = document.getElementById('d-check');
+      var play = function (rate) { dw.plays = (dw.plays || 0) + 1; save(); speak(s.text, rate); };
+      var bp = document.getElementById('d-play'); if (bp) bp.onclick = function () { play(0.95); };
+      var bs = document.getElementById('d-slow'); if (bs) bs.onclick = function () { play(0.7); };
+      var pk = document.getElementById('d-peek');
+      if (pk) pk.onclick = function () {
+        var box = document.getElementById('d-peekbox'); box.textContent = s.text; box.hidden = false; pk.disabled = true;
+        setTimeout(function () { box.hidden = true; box.textContent = ''; pk.disabled = false; }, 4000);
+      };
+      if (!dw.plays && bp && P.pos === run.i) setTimeout(function () { if (player && player.pos === P.pos && !run.ans[P.pos]) play(0.95); }, 350);
+      dta.oninput = function () { dw.text = dta.value; dchk.disabled = wordCount(dta.value) < 2; save(); };
+      dchk.onclick = function () {
+        var D = diffWords(s.text, dw.text);
+        if (!D.ok) recordMiss('dict', { q: s.text }, dw.text);
+        st.dict = st.dict || { n: 0, perfect: 0 }; st.dict.n++; if (D.ok) st.dict.perfect++;
+        settle(D.ok, { diff: D, given: dw.text });
+      };
+    } else if (s.type === 'formal') {
+      var fw2 = run.work[P.pos], fta = document.getElementById('f-text');
+      fta.oninput = function () { fw2.text = fta.value; save(); };
+      document.getElementById('f-check').onclick = function () {
+        var C = formalChecks(s.item, fw2.text), ok = C.every(function (x) { return x.found; });
+        st.formalSeen = st.formalSeen || {}; st.formalSeen[s.item.id] = (st.formalSeen[s.item.id] || 0) + 1;
+        if (!ok) recordMiss('formal', { q: s.item.informal }, fw2.text);
+        st.writings.push({ k: P.item.k, q: 'Passe para o formal: ' + s.item.informal, text: fw2.text, at: new Date().toISOString() });
+        if (st.writings.length > 80) st.writings = st.writings.slice(-80);
+        settle(ok, { checks: C, given: fw2.text });
+      };
     } else if (s.type === 'prompt') {
       document.getElementById('pr-done').onclick = function () { if (!st.done[s.id]) st.done[s.id] = new Date().toISOString(); run.ans[P.pos] = { done: 1 }; save(); rerender(); };
       document.getElementById('pr-later').onclick = function () { run.ans[P.pos] = { later: 1 }; save(); rerender(); };
@@ -621,11 +867,11 @@
       var prevBest = ls.best ? +ls.best.split('/')[0] / Math.max(1, +ls.best.split('/')[1]) : -1;
       if (sum.first && sum.firstOk / sum.first >= prevBest) ls.best = run.result;
       st.lessons[ctx.key] = ls;
-    } else st.sessions = (st.sessions || 0) + 1;
+    } else if (ctx.kind === 'surpresa') st.sessions = (st.sessions || 0) + 1;
   }
   function viewRunEnd(ctx) {
     var run = st.runs[ctx.key];
-    if (!run || !run.finished) { location.replace(ctx.kind === 'lesson' ? ctx.base : '#/treino/surpresa'); return null; }
+    if (!run || !run.finished) { location.replace(ctx.base); return null; }
     var sum = runSummary(run);
     var out = '<div class="eyebrow">' + esc(ctx.title) + '</div><h1>' + (ctx.kind === 'lesson' ? 'Lição feita' : 'Sessão feita') + '</h1>';
     out += '<div class="stats">' +
@@ -648,7 +894,7 @@
   function bindRunEnd(ctx) {
     var b = document.getElementById('run-again');
     if (b) b.onclick = function () {
-      st.runs[ctx.key] = ctx.kind === 'lesson' ? buildRun(ctx.L) : buildSurprise(); save();
+      st.runs[ctx.key] = ctx.kind === 'lesson' ? buildRun(ctx.L) : GEN[ctx.kind].build(); save();
       location.hash = ctx.base + '/1';
     };
   }
@@ -919,7 +1165,11 @@
   }
   function viewDrillHome() {
     var out = '<div class="eyebrow">Treino</div><h1>Drills</h1><p class="lede">Rounds of ' + ROUND_SIZE + '. Cards you miss come back later in the same round, and again in future rounds until they stick. </p><div class="card small box-legend"><b>How the bar fills.</b> Get a card right once and it counts. It comes back the next day, then in 3 days, then a week (the week box), then a month (the month box). Right in the month box and it stays there for good. A miss sends it back to the start, and a card left more than a week past its date slips back a box.<div class="legend-row">' + [1, 2, 3, 4, 5].map(function (b) { return '<span><i class="b' + b + '"></i>' + BOX_NAMES[b] + '</span>'; }).join('') + '</div></div>';
-    out += '<div class="modes"><a class="tile mode mix" href="#/treino/surpresa"><div><div class="tile-title">Sessão surpresa</div><div class="tile-sub">Questions, corrections, a short text and cards from the whole Trilha</div></div><div class="mode-stat">' + (st.sessions || 0) + '<small>feitas</small></div></a>';
+    var due = reviewIds().length;
+    out += '<div class="modes"><a class="tile mode" href="#/treino/revisao"><div><div class="tile-title">Revisão do dia</div><div class="tile-sub">The cards that are due, and the ones you missed</div></div><div class="mode-stat">' + due + '<small>para hoje</small></div></a>';
+    out += '<a class="tile mode" href="#/treino/ditado"><div><div class="tile-title">Ditado</div><div class="tile-sub">Hear a sentence, type it with every accent and ending</div></div><div class="mode-stat">' + ((st.dict && st.dict.n) ? Math.round(100 * st.dict.perfect / st.dict.n) + '%' : '–') + '<small>perfeitos</small></div></a>';
+    if (GEN.formal) out += '<a class="tile mode" href="#/treino/formal"><div><div class="tile-title">Passe para o formal</div><div class="tile-sub">Rewrite what people say the way a formal text says it</div></div><div class="mode-stat">' + FORMAL.length + '<small>frases</small></div></a>';
+    out += '<a class="tile mode mix" href="#/treino/surpresa"><div><div class="tile-title">Sessão surpresa</div><div class="tile-sub">Questions, corrections, a short text and cards from the whole Trilha</div></div><div class="mode-stat">' + (st.sessions || 0) + '<small>feitas</small></div></a>';
     ['mix'].concat(MODE_ORDER).forEach(function (m) {
       var s = modeStats(m);
       var label = m === 'mix' ? 'Tudo misturado' : MODES[m].label;
@@ -940,7 +1190,7 @@
     return isDue(c) ? 5 : 0.3;
   }
   function buildRound(mode) {
-    var pool = DRILLS.filter(function (d) { return mode === 'mix' || d.mode === mode; }).map(function (d) { return d.id; });
+    var pool = mode === 'revisao' ? reviewIds() : DRILLS.filter(function (d) { return mode === 'mix' || d.mode === mode; }).map(function (d) { return d.id; });
     var chosen = [];
     var n = Math.min(ROUND_SIZE, pool.length);
     while (chosen.length < n) {
@@ -953,6 +1203,7 @@
     chosen.forEach(function (id) { var c = st.cards[id]; before[id] = { seen: c ? c.seen : 0, box: effBox(c) }; });
     return { mode: mode, queue: chosen, i: 0, first: {}, requeued: {}, answered: false, given: null, before: before, startedAt: new Date().toISOString() };
   }
+  function roundLabel(m) { return m === 'mix' ? 'Tudo misturado' : m === 'revisao' ? 'Revisão do dia' : MODES[m].label; }
   function currentRound(mode) {
     if (!st.round || st.round.mode !== mode || st.round.finished) { st.round = buildRound(mode); save(); }
     return st.round;
@@ -965,11 +1216,12 @@
       return viewRoundEnd(done);
     }
     var R = currentRound(mode);
+    if (!R.queue.length) { st.round = null; save(); return '<div class="eyebrow">Treino</div><h1>Nada para revisar</h1><p class="lede">Every card you have seen is up to date. New reviews come due tomorrow.</p><div class="btn-row"><a class="btn primary" href="#/treino/surpresa">Sessão surpresa</a><a class="btn" href="#/treino">Treino</a></div>'; }
     var d = DRILL[R.queue[R.i]];
     if (!d) { R.i++; if (R.i >= R.queue.length) { R.finished = true; R.showEnd = true; } save(); return viewRound(mode); }
-    var label = mode === 'mix' ? 'Tudo misturado' : MODES[mode].label;
-    var out = '<div class="round-head"><div class="eyebrow" style="margin:0">' + label + '</div><span class="muted small">' + (R.i + 1) + ' / ' + R.queue.length + '</span></div>';
-    out += '<div class="progress"><i style="width:' + Math.round(100 * R.i / R.queue.length) + '%"></i></div>';
+    var label = roundLabel(mode);
+    var out = '<div class="run-head"><div class="round-head"><div class="eyebrow" style="margin:0">' + label + '</div><span class="muted small">' + (R.i + 1) + ' / ' + R.queue.length + '</span></div>';
+    out += '<div class="progress"><i style="width:' + Math.round(100 * R.i / R.queue.length) + '%"></i></div></div>';
     out += '<div class="drill" id="drill">' + (d.mode === 'acento' ? accentCard(d, R) : choiceCard(d, R)) + '</div>';
     out += '<div class="btn-row" style="justify-content:center"><a class="btn ghost small" href="#/treino">Sair</a></div>';
     return out;
@@ -1042,6 +1294,7 @@
 
   function gradeCard(d, given) {
     var ok = given === (d.mode === 'acento' ? d.word : d.answer);
+    logActivity();
     var c = cardState(d.id);
     c.seen++; c.last = new Date().toISOString();
     if (ok) {
@@ -1098,7 +1351,7 @@
   function viewRoundEnd(R) {
     var ids = Object.keys(R.first), right = ids.filter(function (id) { return R.first[id]; }).length;
     var misses = ids.filter(function (id) { return !R.first[id]; }).map(function (id) { return DRILL[id]; }).filter(Boolean);
-    var label = R.mode === 'mix' ? 'Tudo misturado' : MODES[R.mode].label;
+    var label = roundLabel(R.mode);
     var out = '<div class="eyebrow">' + label + '</div><h1>Round done</h1><div class="card" style="text-align:center"><div class="score-big">' + right + '/' + ids.length + '</div><div class="muted">right on the first try</div></div>';
     if (R.before) {
       var learnedNow = 0, up = 0, slipped = 0;
@@ -1108,7 +1361,7 @@
         else if (c.box > b.box) up++;
         if (b.box && !c.box) slipped++;
       });
-      var ms = modeStats(R.mode);
+      var ms = modeStats(R.mode === 'revisao' ? 'mix' : R.mode);
       out += '<h2>What moved</h2><div class="stats"><div class="stat"><b>+' + learnedNow + '</b><span>newly learned</span></div><div class="stat"><b>' + up + '</b><span>moved up a box</span></div><div class="stat"><b>' + slipped + '</b><span>back to the start</span></div></div>';
       out += '<div class="card small">' + label + boxBar(ms) + '<div class="mode-foot">' + boxLine(ms) + '</div></div>';
     }
@@ -1151,7 +1404,7 @@
     return {
       app: 'celpe-bras-prep', version: 2, exportedAt: new Date().toISOString(),
       rounds: st.rounds, sessions: st.sessions || 0, overall: modeStats('mix'), byMode: byMode,
-      lessons: st.lessons, practiceDone: st.done, misses: misses, recentWrongAnswers: wrongAnswers,
+      lessons: st.lessons, streak: streakDays(), days: st.days, dictation: st.dict || null, practiceDone: st.done, misses: misses, recentWrongAnswers: wrongAnswers,
       lessonMisses: st.lessonMisses.slice(-80), writings: st.writings.slice(-40)
     };
   }
@@ -1188,12 +1441,12 @@
       else if (parts[2] === 'fim') bindRunEnd(lessonCtx(LESSON[parts[1]]));
       else if (player) bindStep();
     }
-    if (sec === 'treino' && parts[1] === 'surpresa') { if (parts[2] === 'fim') bindRunEnd(surpriseCtx()); else if (player) bindStep(); return; }
+    if (sec === 'treino' && GEN[parts[1]]) { if (parts[2] === 'fim') bindRunEnd(genCtx(parts[1])); else if (player) bindStep(); return; }
     if (sec === 'guia' && TASK[parts[1]]) bindSample(TASK[parts[1]].sample);
     if (sec === 'guia' && GENRE[parts[1]]) bindSample(GENRE[parts[1]].sample);
     if (sec === 'pratica' && PROMPT[parts[1]]) bindPrompt(PROMPT[parts[1]]);
     if (sec === 'treino' && parts[1] === 'progresso') bindProgress();
-    else if (sec === 'treino' && (parts[1] === 'mix' || MODES[parts[1]])) {
+    else if (sec === 'treino' && (parts[1] === 'mix' || parts[1] === 'revisao' || MODES[parts[1]])) {
       var R = st.round;
       var again = document.getElementById('again');
       if (again) again.onclick = function () { st.round = buildRound(R.mode); accentWork = null; save(); route(); };

@@ -1,6 +1,8 @@
 // Dev fixture for tests/player.js: one lesson with every step type. Not loaded by the site.
 window.CB = window.CB || {};
 CB.lessons = CB.lessons || [];
+CB.formal = CB.formal || [];
+CB.formal.push({ id: 'fm-dev', context: 'E-mail de reclamação (teste)', informal: 'A gente tá sem água faz três dias.', formal: 'Estamos sem água há três dias.', changes: [ { from: 'A gente tá', to: 'Estamos', why: 'Use nós.' }, { from: 'faz', to: 'há', why: 'Use há.' } ] });
 CB.lessons.push({
   id: 'l00-dev', n: 0, unit: 1, title: 'Lição de teste', en: 'Exercises every step type.', minutes: 5,
   steps: [
@@ -14,6 +16,8 @@ CB.lessons.push({
     { type: 'fix', title: 'Find the 2 mistakes.', text: 'Prezados senhores,\nEscrevo porque {{o|a|*lei* is feminine.}} lei nova não {{e|é|*é* is the verb.}} clara para os moradores.' },
     { type: 'write', q: 'Write one opening line.', text: 'Você reclama de uma cobrança.', model: ['Escrevo para contestar uma cobrança indevida.'], check: ['States the purpose', 'Formal register'] },
     { type: 'drills', modes: ['genero'], tags: ['-ção'], n: 2 },
+    { type: 'dictation', modes: ['genero'], n: 1 },
+    { type: 'formal', n: 1 },
     { type: 'prompt', id: 'c-airfryer', note: 'Practice a complaint.' }
   ]
 });

@@ -89,6 +89,7 @@ CB.lessons.push(
         ]
       },
       { type: 'drills', modes: ['genero'], tags: ['-ção', '-dade', '-gem', '-ma', 'exceção', '-são', '-tude'], n: 10 },
+      { type: 'dictation', modes: ['genero'], n: 2 },
       { type: 'drills', modes: ['registro'], tags: ['há/tem', 'nós/a gente', 'para/pra'], n: 4 }
     ]
   },
@@ -178,6 +179,7 @@ CB.lessons.push(
         ]
       },
       { type: 'drills', modes: ['genero'], tags: ['concordância', 'possessivo'], n: 8 },
+      { type: 'dictation', modes: ['genero'], n: 2 },
       { type: 'drills', modes: ['genero'], tags: ['-ção', '-dade', '-gem', '-ma', 'exceção'], n: 4 }
     ]
   },
@@ -268,6 +270,7 @@ CB.lessons.push(
         ]
       },
       { type: 'drills', modes: ['acento'], n: 8 },
+      { type: 'dictation', modes: ['acento'], n: 2 },
       { type: 'drills', modes: ['genero'], tags: ['concordância'], n: 4 }
     ]
   },
@@ -367,6 +370,7 @@ CB.lessons.push(
         ]
       },
       { type: 'drills', modes: ['conjugacao'], n: 10 },
+      { type: 'dictation', modes: ['conjugacao'], n: 2 },
       { type: 'drills', modes: ['acento'], n: 4 }
     ]
   },
@@ -459,6 +463,7 @@ CB.lessons.push(
         ]
       },
       { type: 'drills', modes: ['regencia', 'contracao'], n: 10 },
+      { type: 'dictation', modes: ['regencia', 'contracao'], n: 2 },
       { type: 'drills', modes: ['conjugacao'], n: 4 }
     ]
   },
@@ -541,6 +546,8 @@ CB.lessons.push(
       },
       { type: 'drills', modes: ['genero', 'acento', 'conjugacao', 'regencia', 'contracao'], n: 10 },
       { type: 'drills', modes: ['abertura'], n: 4 },
+      { type: 'formal', n: 2 },
+      { type: 'dictation', n: 2 },
       { type: 'prompt', id: 'v-feira-livre', note: 'Tarefa 4 blog post: write it by hand in 45 minutes, then do both proofreading passes (gender and number, then accents, verbs and crase) before you send the photo.' }
     ]
   }

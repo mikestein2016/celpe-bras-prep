@@ -86,7 +86,7 @@ const base = process.argv[2] || 'file:///Users/mike/Documents/GitHub/celpe-bras-
   await go('#/', 'trilha');
   const lessons = await page.evaluate(() => (CB.lessons || []).map(L => {
     const keys = [];
-    (function walk(steps, base) { steps.forEach((s, i) => { const k = base + ':' + i; if (s.type === 'pick') walk(s.from, k); else if (s.type !== 'drills') keys.push(k); }); })(L.steps, 'L:' + L.id);
+    (function walk(steps, base) { steps.forEach((s, i) => { const k = base + ':' + i; if (s.type === 'pick') walk(s.from, k); else if (!['drills', 'dictation', 'formal'].includes(s.type)) keys.push(k); }); })(L.steps, 'L:' + L.id);
     return { id: L.id, keys };
   }));
   let stepCount = 0;

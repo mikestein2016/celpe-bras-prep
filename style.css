@@ -208,7 +208,7 @@ details.reveal { background: var(--surface); border: 1px solid var(--line); bord
 details.reveal summary { cursor: pointer; font-family: var(--font-head); font-weight: 700; }
 
 /* Timer */
-.timer { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 12px 16px; margin: 12px 0; position: sticky; top: 62px; z-index: 5; }
+.timer { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 12px 16px; margin: 12px 0; position: sticky; top: calc(var(--tb-h, 62px) + 6px); z-index: 5; }
 .timer-digits { font-family: var(--font-head); font-weight: 800; font-size: 1.9rem; font-variant-numeric: tabular-nums; min-width: 5ch; }
 .timer-digits.low { color: var(--bad); }
 .timer .btn { min-height: 40px; padding: 8px 14px; }
@@ -417,3 +417,37 @@ ul.selfcheck input { width: 20px; height: 20px; margin-top: 3px; accent-color: v
 .legend-row i { display: inline-block; width: 14px; height: 8px; border-radius: 3px; }
 .legend-row i.b1 { background: #b9e4c7; } .legend-row i.b2 { background: #7fcf98; } .legend-row i.b3 { background: #2fae5a; } .legend-row i.b4 { background: var(--green-dark); } .legend-row i.b5 { background: var(--blue); }
 .card .acc-bar.boxes { margin-top: 8px; }
+
+/* Today: streak and review */
+.today { display: grid; grid-template-columns: 1fr auto; gap: 10px; align-items: center; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 12px 14px; margin: 0 0 16px; box-shadow: var(--shadow); }
+.today-streak { font-family: var(--font-head); font-weight: 700; }
+.today-streak b { color: var(--accent); font-size: 1.2rem; }
+.today-streak .small { font-family: var(--font-body); font-weight: 400; }
+
+/* Ditado */
+.dict-result { font-size: 1.15rem; line-height: 2.3; margin: 12px 0 4px; }
+.dw { display: inline-block; position: relative; padding: 0 3px; border-radius: 5px; line-height: 1.5; vertical-align: top; text-align: center; }
+.dw small { display: block; font-family: var(--font-body); font-size: .72rem; line-height: 1.2; }
+.dw.ok { color: var(--good); }
+.dw.acc { background: var(--yellow-soft); color: #7a5b00; font-weight: 600; }
+.dw.bad { background: var(--bad-soft); color: var(--bad); font-weight: 600; }
+.dw.bad small, .dw.acc small { text-decoration: line-through; opacity: .8; }
+.dw.miss { border: 2px dashed var(--bad); color: var(--bad); }
+.dw.extra { color: var(--ink-3); text-decoration: line-through; }
+
+/* Passe para o formal */
+.passage.said { font-style: italic; }
+ul.fchecks { list-style: none; padding: 0; margin: .6em 0 0; }
+ul.fchecks li { padding: 6px 0 6px 26px; position: relative; border-top: 1px solid rgba(0,0,0,.06); }
+ul.fchecks li::before { position: absolute; left: 2px; top: 6px; font-weight: 800; font-family: var(--font-head); }
+ul.fchecks li.hit::before { content: '✓'; color: var(--good); }
+ul.fchecks li.miss::before { content: '✗'; color: var(--bad); }
+ul.fchecks s { color: var(--bad); }
+mark.fm { background: var(--good-soft); color: var(--good); font-weight: 600; padding: 0 2px; border-radius: 4px; }
+
+/* The lesson or round header and its progress bar stay frozen under the top bar. */
+.run-head { position: sticky; top: var(--tb-h, 60px); z-index: 6; background: var(--bg); margin: -20px -16px 14px; padding: 12px 16px 10px; border-bottom: 1px solid var(--line); }
+.run-head .round-head { margin-bottom: 8px; }
+.run-head .round-head .eyebrow { min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.run-head .round-head > :last-child { flex-shrink: 0; }
+.run-head .progress { margin-bottom: 0; }

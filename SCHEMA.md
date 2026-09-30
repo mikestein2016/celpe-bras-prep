@@ -206,7 +206,23 @@ CB.lessons.push({
   // from should hold at least n + 2 steps.
 
 { type: 'prompt', id: 'u-plano-celular', note: 'EN one line: why this prompt now and what to focus on' }
+
+{ type: 'dictation', modes: ['genero'], n: 2 }
+  // Ditado: n sentences read aloud by the device's pt-BR voice, typed and checked word by word.
+  // Sentences are drill cards with the answer filled in (modes optional); missed cards are weighted up.
+
+{ type: 'formal', n: 2 }
+  // Passe para o formal: n items from CB.formal (data/formal.js), least-seen first.
   // A full timed practice prompt, handwritten, photo sent to Claude. The learner can mark it done or do it later.
 ```
 
 **Shape of a good lesson:** teach → 2–3 quick checks (choice, often via pick) → a fix or order step → a short write → a drills step → (sometimes) a prompt. 7 to 11 top-level steps. Every step must be answerable from what the lesson (or an earlier lesson) teaches.
+
+## CB.formal — Passe para o formal (data/formal.js)
+
+```js
+{ id: 'fm-001', context: 'PT genre and reader', informal: 'PT as people say it', formal: 'PT as the text should say it',
+  changes: [ { from: 'exact substring of informal', to: 'exact substring of formal', why: 'EN rule' } ] }  // 2–4 changes
+```
+
+The app marks a change found when `to` appears in what the learner typed (accent-sensitive; an accent-free match is flagged "sem acento").
