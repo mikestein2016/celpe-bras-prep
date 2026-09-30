@@ -91,6 +91,44 @@ for (const L of lessons) {
   for (const k of ['title', 'en', 'unit', 'minutes', 'steps']) if (L[k] == null) bad.push(L.id + ' missing ' + k);
   (L.steps || []).forEach((s, i) => checkStep(s, L.id + '[' + i + ']'));
 }
+// Fix steps say how many mistakes there are (Mike wants the count), and the number must match the markers.
+const NUMW = { one: 1, two: 2, three: 3, four: 4, five: 5, six: 6 };
+function walkFix(steps, where) {
+  (steps || []).forEach((s, i) => {
+    const w = where + '[' + i + ']';
+    if (s.type === 'pick') return walkFix(s.from, w + '.from');
+    if (s.type !== 'fix') return;
+    const n = [...String(s.text).matchAll(FIX)].length;
+    const m = String(s.title).match(/\b(\d+|one|two|three|four|five|six)\s+(?:\w+\s+)?(?:mistakes?|errors?|places?)\b/i);
+    const t = m ? (NUMW[m[1].toLowerCase()] || +m[1]) : null;
+    if (t !== n) bad.push(w + ' fix title says ' + t + ' but has ' + n + ' marked mistakes');
+  });
+}
+lessons.forEach(L => walkFix(L.steps, L.id));
+// Model answers: wordCount matches the text and sits in 150–220.
+const countWords = a => (a || []).map(p => String(p).replace(/\{\{\d+\|/g, '').replace(/\}\}/g, '')).join(' ').split(/\s+/).filter(w => /[\p{L}\p{N}]/u.test(w)).length;
+const samples = Object.entries(models).map(([id, m]) => ['model ' + id, m])
+  .concat((CB.genres || []).filter(g => g.sample).map(g => ['genre ' + g.id, g.sample]))
+  .concat((CB.tasks || []).filter(t => t.sample).map(t => ['task ' + t.id, t.sample]));
+for (const [name, m] of samples) {
+  const n = countWords(m.answer);
+  if (m.wordCount != null && m.wordCount !== n) bad.push(name + ' wordCount ' + m.wordCount + ' but text has ' + n);
+  if (n < 150 || n > 220) bad.push(name + ' has ' + n + ' words (150–220)');
+}
+// Dates: "sábado, 17 de outubro" must fall on that weekday (2026 unless a year follows).
+const MESES = ['janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho', 'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro'];
+const WD = { domingo: 0, segunda: 1, 'terça': 2, quarta: 3, quinta: 4, sexta: 5, 'sábado': 6, sabado: 6 };
+const DATE_RE = new RegExp('(segunda|terça|quarta|quinta|sexta|s[áa]bado|domingo)s?(?:-feira)?[\\s,(]+(?:dia\\s+)?(\\d{1,2})º?(?:\\s+e\\s+(\\d{1,2}))?\\s+de\\s+(' + MESES.join('|') + ')(?:\\s+de\\s+(\\d{4}))?', 'gi');
+for (const f of files) {
+  const src = fs.readFileSync(path.join(root, f), 'utf8');
+  for (const m of src.matchAll(DATE_RE)) {
+    const yr = +(m[5] || 2026), mon = MESES.indexOf(m[4].toLowerCase());
+    for (const d of [m[2], m[3]].filter(Boolean)) {
+      const real = new Date(yr, mon, +d).getDay();
+      if (real !== WD[m[1].toLowerCase()]) bad.push(f + ': "' + m[0] + '" is not a ' + m[1] + ' in ' + yr);
+    }
+  }
+}
 // English style: em dashes in any EN field
 const json = JSON.stringify({ lessons, drills, prompts, models });
 const em = (json.match(/—/g) || []).length; if (em) warn.push(em + ' em dashes in content');
