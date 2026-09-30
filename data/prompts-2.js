@@ -22,7 +22,7 @@ CB.prompts.push(
       ],
       note: "Stands in for a video: read it once, cover it, then write."
     },
-    prompt: "Você mora na Avenida Beira-Rio, por onde passam os principais blocos de carnaval da sua cidade. O jornal Diário do Vale publicou um balanço do carnaval que elogiou a organização da festa, mas não mencionou o trabalho dos catadores. Com base na reportagem, escreva uma carta do leitor ao jornal reconhecendo a importância do trabalho da Cooperativa Recicla Vida, relatando as dificuldades que os cooperados enfrentam e pedindo à prefeitura um apoio concreto para a cooperativa.",
+    prompt: "Você mora na Avenida Beira-Rio, por onde passam os principais blocos de carnaval da sua cidade. O jornal Correio Ribeirinho publicou um balanço do carnaval que elogiou a organização da festa, mas não mencionou o trabalho dos catadores. Com base na reportagem, escreva uma carta do leitor ao jornal reconhecendo a importância do trabalho da Cooperativa Recicla Vida, relatando as dificuldades que os cooperados enfrentam e pedindo à prefeitura um apoio concreto para a cooperativa.",
     checklist: [
       "Carta do leitor format: place and date, *Prezados editores,*, a first line that names the paper's carnival review, *Atenciosamente* and a role signature (*Um morador da Avenida Beira-Rio*).",
       "Written by a resident of the avenue to the paper and its readers. The position comes early (the review left out the people who cleaned the streets) and is backed by his own experience (the street was clean the next morning).",

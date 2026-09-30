@@ -25,7 +25,7 @@ CB.genres.push(
     ],
     skeleton: [
       { part: 'Título', what: 'A short headline in the present tense with the main fact. No period.', example: 'Associação reabre biblioteca comunitária com feira de livros' },
-      { part: 'Lide', what: 'The first paragraph answers o quê, quem, quando, onde and por quê.', example: 'A Associação de Moradores do Jardim das Acácias reabre a biblioteca comunitária do bairro no sábado, 12 de outubro.' },
+      { part: 'Lide', what: 'The first paragraph answers o quê, quem, quando, onde and por quê.', example: 'A Associação de Moradores do Jardim das Acácias reabre a biblioteca comunitária do bairro no sábado, 17 de outubro.' },
       { part: 'Desenvolvimento', what: 'Details in order of importance: background, numbers, program.', example: 'O espaço precisou fechar depois que uma infiltração danificou parte do acervo.' },
       { part: 'Citação', what: 'A quote from someone involved, attributed by name and role.', example: '"Queremos que as crianças voltem a frequentar o lugar", afirmou a presidente da associação.' },
       { part: 'Serviço', what: 'How readers can take part: deadline, place, cost, contact.', example: 'A entrada é gratuita. Doações podem ser entregues na sede da associação até o dia 10.' }
@@ -52,7 +52,7 @@ CB.genres.push(
         kind: 'texto',
         title: 'Nossa biblioteca vai reabrir!',
         body: [
-          'Queridos vizinhos, temos uma ótima notícia: a biblioteca comunitária do Jardim das Acácias vai reabrir no sábado, 12 de outubro, às 9h. O espaço ficou fechado por dois anos, depois que uma infiltração no telhado estragou parte do acervo e o salão precisou de reforma.',
+          'Queridos vizinhos, temos uma ótima notícia: a biblioteca comunitária do Jardim das Acácias vai reabrir no sábado, 17 de outubro, às 9h. O espaço ficou fechado por dois anos, depois que uma infiltração no telhado estragou parte do acervo e o salão precisou de reforma.',
           'Com a ajuda de voluntários e de uma vaquinha feita no próprio bairro, conseguimos consertar o telhado, pintar as paredes e comprar estantes novas. Hoje o acervo tem cerca de 3 mil livros, quase todos doados por moradores.',
           'Para comemorar, vamos fazer uma feira de livros na praça em frente à biblioteca, na Rua das Palmeiras, 240, das 9h às 17h. Vai ter troca de livros usados, contação de histórias para as crianças e venda de livros a preço popular por pequenas editoras da região. A entrada é gratuita.',
           '"A biblioteca é o único espaço de leitura gratuito do bairro. Queremos que as crianças e os idosos voltem a frequentar o lugar", diz Lúcia Ramos, presidente da associação.',
@@ -62,7 +62,7 @@ CB.genres.push(
       prompt: 'Você colabora com o site de notícias do seu bairro, o Acácias em Foco. Com base no comunicado da Associação de Moradores, escreva uma notícia para o site informando os leitores sobre a reabertura da biblioteca comunitária e a feira de livros. Apresente o fato, explique por que o espaço estava fechado e como foi recuperado, inclua a fala de uma pessoa envolvida e informe como os moradores podem participar.',
       answer: [
         '{{1|Biblioteca comunitária do Jardim das Acácias reabre com feira de livros}}',
-        '{{2|A Associação de Moradores do Jardim das Acácias reabre a biblioteca comunitária do bairro no sábado, 12 de outubro,}} {{3|depois de dois anos fechada}} para reforma. Para comemorar, {{4|haverá}} uma feira de livros na praça em frente ao espaço, na Rua das Palmeiras, 240, das 9h às 17h.',
+        '{{2|A Associação de Moradores do Jardim das Acácias reabre a biblioteca comunitária do bairro no sábado, 17 de outubro,}} {{3|depois de dois anos fechada}} para reforma. Para comemorar, {{4|haverá}} uma feira de livros na praça em frente ao espaço, na Rua das Palmeiras, 240, das 9h às 17h.',
         '{{5|O espaço}} precisou fechar depois que uma infiltração no telhado {{6|danificou parte do acervo}}. Com a ajuda de voluntários e de {{7|uma arrecadação entre os próprios moradores}}, a associação consertou o telhado, pintou o salão e comprou estantes novas. Hoje o acervo reúne {{8|cerca de 3 mil livros}}, {{3|quase todos doados}} pela vizinhança.',
         '{{5|A feira}} terá troca de livros usados, contação de histórias para as crianças e venda de livros a preço popular por pequenas editoras da região.',
         '{{9|"A biblioteca é o único espaço de leitura gratuito do bairro. Queremos que as crianças e os idosos voltem a frequentar o lugar", afirmou Lúcia Ramos, presidente da associação.}}',
@@ -70,7 +70,7 @@ CB.genres.push(
       ],
       notes: [
         { n: 1, cat: 'genero', text: 'The title states the main fact in the present tense, the way real headlines do. It has a subject, a verb and the event, with no period and no opinion adjective.' },
-        { n: 2, cat: 'genero', text: 'This is the *lide*. One sentence answers who (*a Associação*), what (*reabre a biblioteca*), when (*sábado, 12 de outubro*) and where (*Jardim das Acácias*). The why (*depois de dois anos fechada para reforma*) and the feira follow at once. A reader who stops here already has the story.' },
+        { n: 2, cat: 'genero', text: 'This is the *lide*. One sentence answers who (*a Associação*), what (*reabre a biblioteca*), when (*sábado, 17 de outubro*) and where (*Jardim das Acácias*). The why (*depois de dois anos fechada para reforma*) and the feira follow at once. A reader who stops here already has the story.' },
         { n: 3, cat: 'lingua', text: 'Agreement worth copying. *Fechada* agrees with *biblioteca* (feminine), and *doados* agrees with *livros* (masculine plural). Check every participle and adjective against its noun; this is the check that catches *o lei* or *celulares velhas*.' },
         { n: 4, cat: 'registro', text: 'The announcement says *vai ter uma feira*, which is how people speak. For "there is" or "there will be", writing uses *haver*: *há*, *haverá*. Later, *a feira terá* is correct because there *ter* has a real subject (the fair has activities).' },
         { n: 5, cat: 'coesao', text: '*O espaço* and *a feira* refer back to things already named. This reference chain moves the text forward without repeating *a biblioteca* in every sentence, and it keeps sentences short.' },
@@ -203,8 +203,8 @@ CB.genres.push(
       { part: 'Título', what: 'A catchy line, often in the imperative.', example: 'Doe sangue. Alguém está esperando por você.' },
       { part: 'Quem assina', what: 'The organization behind the campaign.', example: 'Campanha do Grupo de Voluntários do Hospital Vale Verde' },
       { part: 'Por que agir', what: 'One or two facts that create the need.', example: 'Os estoques de sangue precisam de reposição todos os dias.' },
-      { part: 'Blocos informativos', what: 'Short blocks under question headings.', example: 'Quem pode doar? Pessoas saudáveis de 16 a 69 anos.' },
-      { part: 'Serviço', what: 'Date, time, address, what to bring.', example: 'Sábado, 18 de outubro, das 8h às 14h, na Rua dos Ipês, 450.' },
+      { part: 'Blocos informativos', what: 'Short blocks under question headings.', example: 'Quem pode doar? Pessoas saudáveis com peso mínimo de 50 kg.' },
+      { part: 'Serviço', what: 'Date, time, address, what to bring.', example: 'Sábado, 17 de outubro, das 8h às 14h, na Rua dos Ipês, 450.' },
       { part: 'Chamada para ação', what: 'A final push to act, in the imperative.', example: 'Venha doar e traga um amigo.' }
     ],
     wordChoices: [
@@ -230,24 +230,24 @@ CB.genres.push(
         title: 'Doação de sangue: quem pode doar e como se preparar',
         body: [
           'A doação de sangue é um gesto simples e seguro, e os hospitais dependem dela todos os dias. O sangue não pode ser fabricado, e cada bolsa coletada ajuda pacientes em cirurgias, tratamentos e emergências. Em períodos de férias e feriados, as doações costumam cair, e os estoques ficam baixos.',
-          'Para doar, é preciso ter entre 16 e 69 anos. Jovens de 16 e 17 anos só podem doar com a autorização do responsável legal. Também é necessário pesar no mínimo 50 kg e estar em boas condições de saúde.',
+          'Para doar, é preciso ter entre 16 e 69 anos, desde que a primeira doação tenha sido feita até os 60 anos. Jovens de 16 e 17 anos só podem doar com a autorização do responsável legal. Também é necessário pesar no mínimo 50 kg e estar em boas condições de saúde.',
           'No dia da doação, o candidato deve estar descansado e alimentado. Não se deve doar em jejum, e é recomendado evitar alimentos gordurosos nas horas anteriores à coleta. Além disso, é obrigatório apresentar um documento oficial com foto.',
           'Antes da coleta, cada candidato passa por uma avaliação com a equipe de saúde, que garante a segurança de quem doa e de quem recebe o sangue.'
         ]
       },
-      prompt: 'Você faz parte do grupo de voluntários do Hospital Vale Verde, que vai realizar uma campanha de doação de sangue no sábado, 18 de outubro, das 8h às 14h, no próprio hospital (Rua dos Ipês, 450). Com base no texto, escreva um folheto para ser distribuído no bairro, convidando os moradores a doar sangue e informando quem pode doar, como se preparar e o que levar.',
+      prompt: 'Você faz parte do grupo de voluntários do Hospital Vale Verde, que vai realizar uma campanha de doação de sangue no sábado, 17 de outubro, das 8h às 14h, no próprio hospital (Rua dos Ipês, 450). Com base no texto, escreva um folheto para ser distribuído no bairro, convidando os moradores a doar sangue e informando quem pode doar, como se preparar e o que levar.',
       answer: [
         '{{1|Doe sangue. Alguém está esperando por você.}}',
         '{{2|Campanha do Grupo de Voluntários do Hospital Vale Verde}}',
         '{{3|Os hospitais precisam de sangue todos os dias, e ele não pode ser fabricado. Em períodos de férias e feriados, as doações costumam cair.}} {{4|Por isso,}} {{5|a sua doação faz diferença.}}',
         '{{6|Quem pode doar?}}',
-        '{{7|Pessoas saudáveis}} de 16 a 69 anos, com peso mínimo de 50 kg. Menores de 18 anos precisam da autorização do responsável legal.',
+        '{{7|Pessoas saudáveis}} de 16 a 69 anos, com peso mínimo de 50 kg. Quem tem mais de 60 anos só pode doar se a primeira doação tiver sido feita até os 60. Menores de 18 anos precisam da autorização do responsável legal.',
         '{{6|Como se preparar?}}',
         '{{8|Durma bem na noite anterior e não venha em jejum.}} {{9|Evite}} alimentos gordurosos antes da doação.',
         '{{6|O que levar?}}',
         'Um documento oficial com foto.',
         '{{6|Quando e onde?}}',
-        'Sábado, 18 de outubro, {{10|das 8h às 14h}}, no Hospital Vale Verde, Rua dos Ipês, 450.',
+        'Sábado, 17 de outubro, {{10|das 8h às 14h}}, no Hospital Vale Verde, Rua dos Ipês, 450.',
         '{{11|Doar é simples e seguro. Antes da coleta, uma equipe de saúde faz uma avaliação para garantir a segurança de quem doa e de quem recebe.}}',
         '{{12|Venha doar e traga um amigo. Um gesto simples pode salvar vidas.}}'
       ],
@@ -266,7 +266,7 @@ CB.genres.push(
         { n: 12, cat: 'genero', text: 'The call to action closes the flyer with two imperatives and a short reason. The date, time and address above it tell the reader exactly where to go.' }
       ],
       why5: 'The flyer has everything the genre asks for. It opens with a title that catches the eye and a line naming the volunteer group, organizes the information in short blocks under question headings, and ends with a call to action. It uses every requirement in the source, reworded but factually exact, and adds only what the prompt gave (date, time, address). The reader is addressed as *você* throughout, with correct imperative forms (*durma, venha, evite, traga*). The opening gives a reason to act before listing rules, which is the persuasive move a campaign needs. Agreement (*pessoas saudáveis*), crase (*das 8h às 14h*) and accents are clean, and every sentence can be taken in at a glance.',
-      wordCount: 157
+      wordCount: 176
     }
   },
 
@@ -330,14 +330,14 @@ CB.genres.push(
           'Secretaria Municipal de Meio Ambiente'
         ]
       },
-      prompt: 'Você faz parte da diretoria da Associação de Moradores do Bairro Nova Aurora. A associação decidiu organizar um mutirão de limpeza no Parque do Ipê Amarelo no domingo, 9 de novembro, das 8h ao meio-dia, e já solicitou o apoio da prefeitura. Com base na mensagem da Secretaria Municipal de Meio Ambiente, escreva um convite aos moradores do bairro, que será afixado nos prédios e publicado no grupo da associação. Explique por que o mutirão é importante, informe o que a prefeitura vai oferecer e diga como participar.',
+      prompt: 'Você faz parte da diretoria da Associação de Moradores do Bairro Nova Aurora. A associação decidiu organizar um mutirão de limpeza no Parque do Ipê Amarelo no domingo, 8 de novembro, das 8h ao meio-dia, e já solicitou o apoio da prefeitura. Com base na mensagem da Secretaria Municipal de Meio Ambiente, escreva um convite aos moradores do bairro, que será afixado nos prédios e publicado no grupo da associação. Explique por que o mutirão é importante, informe o que a prefeitura vai oferecer e diga como participar.',
       answer: [
         '{{1|Mutirão de limpeza no Parque do Ipê Amarelo}}',
         '{{2|Caros vizinhos,}}',
-        '{{3|A Associação de Moradores do Bairro Nova Aurora}} {{4|convida todos os moradores a participar de}} um mutirão de limpeza no Parque do Ipê Amarelo. {{5|O encontro será no domingo, 9 de novembro, das 8h ao meio-dia, no portão principal do parque.}}',
+        '{{3|A Associação de Moradores do Bairro Nova Aurora}} {{4|convida todos os moradores a participar de}} um mutirão de limpeza no Parque do Ipê Amarelo. {{5|O encontro será no domingo, 8 de novembro, das 8h ao meio-dia, no portão principal do parque.}}',
         '{{6|Uma vistoria recente da prefeitura encontrou muito lixo acumulado no parque, principalmente garrafas plásticas, latas e sacolas.}} {{7|Além disso,}} o lixo bloqueia o córrego em alguns pontos, o que aumenta o risco de alagamento quando chove. {{7|Esse lixo}} também atrai ratos e baratas e pode se tornar criadouro do mosquito da dengue.',
         '{{8|A Secretaria Municipal de Meio Ambiente vai fornecer luvas, sacos de lixo reforçados e um caminhão para recolher o material no fim do mutirão.}} {{9|Pedimos que cada participante traga}} uma garrafa de água, boné e protetor solar, e {{9|que use}} calçado fechado.',
-        '{{5|Para participar, basta enviar nome e endereço pelo WhatsApp da associação até sexta-feira, 7 de novembro.}} {{10|Crianças são bem-vindas, desde que acompanhadas por um adulto.}}',
+        '{{5|Para participar, basta enviar nome e endereço pelo WhatsApp da associação até sexta-feira, 6 de novembro.}} {{10|Crianças são bem-vindas, desde que acompanhadas por um adulto.}}',
         '{{11|O parque é de todos nós. Contamos com a presença de vocês!}}',
         '{{12|Diretoria da Associação de Moradores do Bairro Nova Aurora}}'
       ],
@@ -346,7 +346,7 @@ CB.genres.push(
         { n: 2, cat: 'registro', text: '*Caros vizinhos* is warm but still written, which suits a notice posted in buildings and in a group chat. *Oi, galera* would be too casual, and *Prezados senhores* too stiff for neighbors.' },
         { n: 3, cat: 'papel', text: 'The first sentence says who invites (the association) and whom (the residents), so the role from the prompt is on the page from the first line.' },
         { n: 4, cat: 'lingua', text: 'Two cases of regência in one phrase: *convidar alguém a* (or *para*) *fazer algo*, and *participar de algo*. The same pattern gives *incentivar as crianças a usar* and *ajudar os moradores a separar o lixo*. The preposition before the infinitive is not optional.' },
-        { n: 5, cat: 'genero', text: 'The practical details every invitation needs. When and where come in the first paragraph (*domingo, 9 de novembro, das 8h ao meio-dia, portão principal*), and how and by when to sign up come near the end.' },
+        { n: 5, cat: 'genero', text: 'The practical details every invitation needs. When and where come in the first paragraph (*domingo, 8 de novembro, das 8h ao meio-dia, portão principal*), and how and by when to sign up come near the end.' },
         { n: 6, cat: 'fonte', text: 'The city\'s inspection is the main reason to join, so it comes right after the invitation. The official wording (*grande quantidade de lixo acumulado*) is simplified for neighbors, and the three types of waste stay.' },
         { n: 7, cat: 'coesao', text: '*Além disso* adds a second problem, and *esse lixo* points back to the waste already described. The paragraph builds the case for joining instead of listing disconnected facts.' },
         { n: 8, cat: 'fonte', text: 'The support offered in the source (gloves, bags, a truck) answers the reader\'s practical question about what they need to bring. It also shows the event is organized with the city.' },
@@ -394,7 +394,7 @@ CB.genres.push(
       { use: 'destaca, alerta, explica, conclui', avoid: 'diz, fala (repeated)', why: 'Varying the verb shows what the author is doing at each point: warning, explaining, concluding.' },
       { use: 'os estudantes', avoid: 'a gente / os nossos alunos', why: 'The summary reports the article, which speaks about students in general.' },
       { use: 'Além disso / Por outro lado', avoid: 'E também / Mas', why: 'Written connectors. Do not open a sentence with *Mas*.' },
-      { use: 'a reportagem mostra que', avoid: 'foi descoberto que', why: '*Foi descoberto que* is a calque of "it was found that". Say who found or showed it.' },
+      { use: 'a reportagem mostra que', avoid: 'foi descoberto que', why: '*Foi descoberto que* is less natural in a summary. Say who found or showed it.' },
       { use: 'preocupados com', avoid: 'preocupados sobre', why: 'The verb is *preocupar-se com*. *Sobre* is a calque of "worried about".' }
     ],
     pitfalls: [
@@ -402,7 +402,7 @@ CB.genres.push(
       'Retelling every example. Keep the main idea of each paragraph and drop the illustrations.',
       'Copying sentences from the original. Reword them with your own structures and keep the attributions.',
       'Repeating *o autor diz* in every sentence. Vary the verb and use connectors.',
-      'English calques such as *foi descoberto que*. Name the agent: *a reportagem mostra que*, *os educadores constatam que*.',
+      'Agentless phrases such as *foi descoberto que*, which read less naturally than naming the agent: *a reportagem mostra que*, *os educadores constatam que*.',
       'Run-on sentences chained with *e*. A summary works best in short sentences with one idea each.'
     ],
     sample: {

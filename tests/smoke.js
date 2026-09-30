@@ -114,9 +114,10 @@ const base = process.argv[2] || 'file:///Users/mike/Documents/GitHub/celpe-bras-
   await go('#/treino/surpresa', 'surpresa');
   if (!/surpresa\/1$/.test(await page.evaluate(() => location.hash))) errors.push('surpresa did not start at step 1');
   await go('#/treino/progresso', 'progresso');
-  const [dl] = await Promise.all([page.waitForEvent('download'), page.click('#exp-dl')]);
+  const [dl] = await Promise.all([page.waitForEvent('download'), page.click('[data-backup="save"]')]);
   const f = path.join(OUT, 'export.json'); await dl.saveAs(f);
   const ex = JSON.parse(require('fs').readFileSync(f, 'utf8'));
+  if (!ex.state || !ex.state.cards) errors.push('backup has no state');
   console.log('export: rounds', ex.rounds, 'misses', ex.misses.length, 'overall', JSON.stringify(ex.overall));
   // refresh keeps place
   await go('#/treino/genero'); await page.reload(); await page.waitForTimeout(200);

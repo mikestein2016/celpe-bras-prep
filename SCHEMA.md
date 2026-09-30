@@ -222,7 +222,7 @@ CB.lessons.push({
 
 ```js
 { id: 'fm-001', context: 'PT genre and reader', informal: 'PT as people say it', formal: 'PT as the text should say it',
-  changes: [ { from: 'exact substring of informal', to: 'exact substring of formal', why: 'EN rule' } ] }  // 2–4 changes
+  changes: [ { from: 'exact substring of informal', to: 'exact substring of formal', alt: ['optional equally good rewrite'], why: 'EN rule' } ] }  // 2–4 changes
 ```
 
-The app marks a change found when `to` appears in what the learner typed (accent-sensitive; an accent-free match is flagged "sem acento").
+The app marks a change found when `to` or any `alt` appears in what the learner typed (whole words, case-insensitive, punctuation ignored; an accent-free match is flagged "sem acento"). `to` must appear verbatim in `formal`, because the model highlights by `to`. `alt` is optional and holds rewrites that are just as formal but would otherwise be rejected (*inscrevi-me* for *fiz a minha inscrição*).

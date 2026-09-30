@@ -99,7 +99,7 @@ CB.drills.push(
   { id: 'ge-002', mode: 'genero', prompt: 'Os pais apoiam ___ proibição dos celulares.', options: ['o', 'a'], answer: 'a', rule: 'Nouns ending in -ção are feminine.', tag: '-ção' },
   { id: 'ge-003', mode: 'genero', prompt: 'Na escola, há ___ coisas para aprender longe do celular.', options: ['tantos', 'tantas'], answer: 'tantas', rule: 'Quantity words agree with the noun: *coisa* is feminine, so *tantas coisas*.', tag: 'concordância' },
   { id: 'ge-004', mode: 'genero', prompt: 'Longe das telas, as crianças desenvolvem ___ imaginações.', options: ['seus', 'suas'], answer: 'suas', rule: 'Possessives agree with the thing owned, not the owner: *suas imaginações*.', tag: 'possessivo' },
-  { id: 'ge-005', mode: 'genero', prompt: 'Foi ___ que muitos moradores não separam o lixo.', options: ['descoberto', 'descoberta'], answer: 'descoberto', rule: 'When the subject is a whole *que* clause, the participle stays masculine singular: *foi descoberto que*.', tag: 'particípio impessoal' },
+  { id: 'ge-005', mode: 'genero', prompt: 'Ficou ___ que muitos moradores não separam o lixo.', options: ['comprovado', 'comprovada'], answer: 'comprovado', rule: 'When the subject is a whole *que* clause, the participle stays masculine singular: *ficou comprovado que*.', tag: 'particípio impessoal' },
   { id: 'ge-006', mode: 'genero', prompt: 'Muitas famílias guardam celulares ___ na gaveta.', options: ['velhos', 'velhas'], answer: 'velhos', rule: '*celular* is masculine, so its adjective is too: *celulares velhos*.', tag: 'concordância' },
   { id: 'ge-007', mode: 'genero', prompt: 'O ponto de coleta aceita TVs ___.', options: ['velhos', 'velhas'], answer: 'velhas', rule: '*TV* is short for *televisão*, which is feminine: *TVs velhas*.', tag: 'concordância' },
   { id: 'ge-008', mode: 'genero', prompt: 'Os ___ antigos podem ser reciclados.', options: ['celulars', 'celulares'], answer: 'celulares', rule: 'Nouns ending in -r add -es in the plural: *celular, celulares*.', tag: 'plural' },
@@ -194,8 +194,8 @@ CB.drills.push(
   // em + o/a/os/as
   { id: 'co-007', mode: 'contracao', prompt: 'O documento está ___ gaveta da mesa.', options: ['em', 'no', 'na'], answer: 'na', rule: '*em + a* contracts to *na*.', tag: 'em' },
   { id: 'co-008', mode: 'contracao', prompt: 'Deixei o carro ___ garagem.', options: ['em', 'no', 'na'], answer: 'na', rule: '*em + a* contracts to *na*; *garagem* is feminine.', tag: 'em' },
-  { id: 'co-009', mode: 'contracao', prompt: 'As crianças brincam ___ parques do bairro.', options: ['em', 'nos', 'nas'], answer: 'nos', rule: '*em + os* contracts to *nos*.', tag: 'em' },
-  { id: 'co-010', mode: 'contracao', prompt: 'Há buracos ___ ruas do centro.', options: ['em', 'nos', 'nas'], answer: 'nas', rule: '*em + as* contracts to *nas*.', tag: 'em' },
+  { id: 'co-009', mode: 'contracao', prompt: 'As crianças brincam sempre ___ mesmos parques.', options: ['em', 'nos', 'nas'], answer: 'nos', rule: '*Mesmos* needs the article, and *em + os* contracts to *nos*.', tag: 'em' },
+  { id: 'co-010', mode: 'contracao', prompt: 'Há buracos ___ principais ruas do centro.', options: ['em', 'nos', 'nas'], answer: 'nas', rule: '*Principais* before the noun needs the article, and *em + as* contracts to *nas*.', tag: 'em' },
   { id: 'co-011', mode: 'contracao', prompt: 'Minha irmã mora ___ Rio de Janeiro.', options: ['em', 'no', 'na'], answer: 'no', rule: 'Places that take an article contract: *o Rio*, so *no Rio*.', tag: 'em' },
   { id: 'co-012', mode: 'contracao', prompt: 'Minha irmã mora ___ São Paulo.', options: ['em', 'no', 'na'], answer: 'em', rule: 'Most city names take no article, so *em* stays alone: *em São Paulo*.', tag: 'em' },
   { id: 'co-013', mode: 'contracao', prompt: 'Pensei ___ problema a noite toda.', options: ['em', 'no'], answer: 'no', rule: '*pensar em* + *o problema* contracts to *no problema*.', tag: 'em' },
@@ -222,15 +222,15 @@ CB.drills.push(
   // por + o/a
   { id: 'co-029', mode: 'contracao', prompt: 'Passamos ___ centro da cidade.', options: ['por', 'pelo', 'pela'], answer: 'pelo', rule: '*por + o* contracts to *pelo*.', tag: 'por' },
   { id: 'co-030', mode: 'contracao', prompt: 'A praça foi reformada ___ prefeitura.', options: ['por', 'pelo', 'pela'], answer: 'pela', rule: '*por + a* contracts to *pela*.', tag: 'por' },
-  { id: 'co-031', mode: 'contracao', prompt: 'Fomos atendidos ___ médicos de plantão.', options: ['por', 'pelos', 'pelas'], answer: 'pelos', rule: '*por + os* contracts to *pelos*.', tag: 'por' },
-  { id: 'co-032', mode: 'contracao', prompt: 'Andei ___ ruas do bairro.', options: ['por', 'pelos', 'pelas'], answer: 'pelas', rule: '*por + as* contracts to *pelas*.', tag: 'por' },
+  { id: 'co-031', mode: 'contracao', prompt: 'Fomos atendidos ___ próprios médicos que fizeram a cirurgia.', options: ['por', 'pelos', 'pelas'], answer: 'pelos', rule: '*Próprios* here needs the article, and *por + os* contracts to *pelos*.', tag: 'por' },
+  { id: 'co-032', mode: 'contracao', prompt: 'Andei ___ mesmas ruas de ontem.', options: ['por', 'pelos', 'pelas'], answer: 'pelas', rule: '*Mesmas* needs the article, and *por + as* contracts to *pelas*.', tag: 'por' },
 
   // a + o/a, crase
   { id: 'co-033', mode: 'contracao', prompt: 'Fui ___ mercado ontem.', options: ['a', 'ao', 'à'], answer: 'ao', rule: '*a + o* contracts to *ao* before a masculine noun.', tag: 'a' },
   { id: 'co-034', mode: 'contracao', prompt: 'Enviei um e-mail ___ diretor.', options: ['a', 'ao', 'à'], answer: 'ao', rule: '*a + o* contracts to *ao* before a masculine noun.', tag: 'a' },
   { id: 'co-035', mode: 'contracao', prompt: 'Vou ___ escola buscar meu filho.', options: ['a', 'à'], answer: 'à', rule: 'Crase: *ir a* + *a escola* becomes *à escola*.', tag: 'crase' },
   { id: 'co-036', mode: 'contracao', prompt: 'A reunião começa ___ 10 horas.', options: ['as', 'às'], answer: 'às', rule: 'Clock times take crase: *às 10 horas*.', tag: 'crase' },
-  { id: 'co-037', mode: 'contracao', prompt: 'Chego em casa ___ noite.', options: ['a', 'à'], answer: 'à', rule: 'Feminine time expressions take crase: *à noite*, *à tarde*.', tag: 'crase' },
+  { id: 'co-037', mode: 'contracao', prompt: 'Saio do trabalho ___ noite.', options: ['a', 'à'], answer: 'à', rule: 'Feminine time expressions take crase: *à noite*, *à tarde*.', tag: 'crase' },
   { id: 'co-038', mode: 'contracao', prompt: 'Entreguei o relatório ___ diretora.', options: ['a', 'à'], answer: 'à', rule: 'Crase: *entregar a* + *a diretora* becomes *à diretora*.', tag: 'crase' },
   { id: 'co-039', mode: 'contracao', prompt: 'Devolvemos os livros ___ bibliotecas do bairro.', options: ['as', 'às'], answer: 'às', rule: 'Crase: *devolver a* + *as bibliotecas* becomes *às bibliotecas*.', tag: 'crase' },
   { id: 'co-040', mode: 'contracao', prompt: 'Estou ___ disposição para mais informações.', options: ['a', 'à'], answer: 'à', rule: 'Fixed feminine expressions take crase: *à disposição*.', tag: 'crase' },
@@ -292,7 +292,7 @@ CB.drills.push(
   // Learner's own errors first
   { id: 'cj-001', mode: 'conjugacao', prompt: 'A escola criou o recreio sem celular para as crianças ___ mais tempo juntas.', options: ['passar', 'passarem'], answer: 'passarem', rule: 'An infinitive with its own plural subject adds -em: *para as crianças passarem*.', tag: 'infinitivo pessoal' },
   { id: 'cj-002', mode: 'conjugacao', prompt: 'Os garis que ___ o lixo trabalham de madrugada.', options: ['recolher', 'recolhem'], answer: 'recolhem', rule: 'A *que* clause needs a conjugated verb, not the infinitive: *que recolhem*.', tag: 'conjugado' },
-  { id: 'cj-003', mode: 'conjugacao', prompt: 'Os lixeiros que ___ o lixo passam às seis da manhã.', options: ['buscar', 'buscam'], answer: 'buscam', rule: 'A *que* clause needs a conjugated verb, not the infinitive: *que buscam*.', tag: 'conjugado' },
+  { id: 'cj-003', mode: 'conjugacao', prompt: 'Os coletores que ___ o lixo passam às seis da manhã.', options: ['recolher', 'recolhem'], answer: 'recolhem', rule: 'A *que* clause needs a conjugated verb, not the infinitive: *que recolhem*.', tag: 'conjugado' },
   { id: 'cj-004', mode: 'conjugacao', prompt: 'Por favor, ___ seus aparelhos na caixa antes da aula.', options: ['coloquem', 'coloca'], answer: 'coloquem', rule: 'A notice to many people uses the plural imperative: *coloquem*.', tag: 'imperativo' },
 
   // Subjunctive after triggers

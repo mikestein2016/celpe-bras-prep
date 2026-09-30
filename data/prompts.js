@@ -100,7 +100,7 @@ CB.prompts.push(
         "Locutor: E quem pode participar?",
         "Marta: Qualquer morador. A gente se reúne todo sábado, das oito às onze da manhã. Não precisa saber plantar, a gente ensina. Os alunos da escola também vêm uma vez por semana com a professora de Ciências.",
         "Locutor: E o que vocês fazem com o que colhem?",
-        "Marta: Metade fica com quem trabalha na horta. A outra metade a gente doa para a cozinha da creche do bairro. Agora o nosso sonho é conseguir uma caixa d'água, porque no verão a gente carrega balde da casa dos vizinhos."
+        "Marta: Metade fica com quem trabalha na horta. A outra metade a gente doa para a cozinha da creche do bairro. Agora o nosso sonho é conseguir uma caixa-d'água, porque no verão a gente carrega balde da casa dos vizinhos."
       ],
       note: "Stands in for a recording: read it once, cover it, then write."
     },

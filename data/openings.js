@@ -47,7 +47,7 @@ CB.openings = {
       title: 'A company\'s customer service',
       genres: ['reclamacao', 'solicitacao'],
       reader: 'An agent at the SAC or the ouvidoria who reads dozens of complaints a day. They expect a formal, firm and factual message that identifies the order or contract at once. Refer to the company in the third person (*a empresa*, *a loja*), never as *vocês*.',
-      greeting: ['Prezados senhores,', 'Prezada equipe de atendimento,', 'À Ouvidoria da Loja Casa Bela'],
+      greeting: ['Prezados senhores,', 'Prezada equipe de atendimento,', 'Prezada Ouvidoria,'],
       opening: [
         'Sou cliente da NetVale há três anos e escrevo para registrar uma reclamação sobre...',
         'Escrevo para relatar um problema com o pedido nº 45872, feito no dia 3 de março.',
@@ -162,7 +162,7 @@ CB.openings = {
       reader: 'A whole group: the residents of a building, the parents of a school, the employees of a company. The text speaks for the institution in the plural (*informamos*, *solicitamos*) and addresses everyone at once. The closing line can stand alone before the signature, or be followed by *Atenciosamente*.',
       greeting: ['Senhores moradores,', 'Senhores pais e responsáveis,', 'Prezados colaboradores,', 'Prezadas famílias,'],
       opening: [
-        'Informamos que, a partir de segunda-feira, 3 de março, ...',
+        'Informamos que, a partir de segunda-feira, 2 de março, ...',
         'Comunicamos aos moradores que...',
         'Em razão da reforma da garagem, informamos que...'
       ],
@@ -193,7 +193,7 @@ CB.openings = {
       opening: [
         'A Associação de Moradores convida todos os vizinhos para...',
         'Temos o prazer de convidar vocês para...',
-        'Venham participar do nosso mutirão de limpeza, no domingo, 9 de novembro, às 8h.'
+        'Venham participar do nosso mutirão de limpeza, no domingo, 8 de novembro, às 8h.'
       ],
       closingLines: [
         'Contamos com a presença de vocês!',
@@ -208,7 +208,7 @@ CB.openings = {
         { bad: 'Venham e traz um prato de doce.', why: 'Mixed imperatives. With *vocês*, every verb takes the plural form: *venham e tragam*.' }
       ],
       example: {
-        opening: 'A Associação de Moradores do Jardim Aurora convida todos os vizinhos para a Festa da Primavera, no sábado, 21 de setembro, a partir das 15h, na praça central do bairro.',
+        opening: 'A Associação de Moradores do Jardim Aurora convida todos os vizinhos para a Festa da Primavera, no sábado, 26 de setembro, a partir das 15h, na praça central do bairro.',
         closing: 'Tragam um prato de doce ou salgado para dividir. Contamos com a presença de vocês!\nDiretoria da Associação de Moradores do Jardim Aurora'
       }
     },
@@ -216,8 +216,8 @@ CB.openings = {
       id: 'blog-folheto',
       title: 'Blog or flyer readers',
       genres: ['blog', 'folheto'],
-      reader: 'The general public or a blog\'s readers. There is no greeting line: a title opens the text, and the first sentence speaks straight to the reader as *você*, often with a question. The end is a call to act or to comment, not a letter closing.',
-      greeting: ['Nenhuma: o título abre o texto.'],
+      reader: 'The general public or a blog\'s readers. A title opens the text. A greeting line is optional. A blog post may open with *Olá, pessoal!*, and a flyer usually has none. The first sentence speaks straight to the reader as *você*, often with a question. The end is a call to act or to comment, not a letter closing.',
+      greeting: ['Olá, pessoal! (opcional, no blog)', 'Nenhuma: o título abre o texto.'],
       opening: [
         'Você já reparou que...?',
         'Você sabia que...?',

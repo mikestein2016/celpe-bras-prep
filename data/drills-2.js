@@ -242,7 +242,7 @@ CB.drills.push(
   { id: 'cn-028', mode: 'conectivo', prompt: 'O trabalho remoto economiza tempo. ___, pode isolar o funcionário.', options: ['Por outro lado', 'Além disso', 'Por exemplo'], answer: 'Por outro lado', rule: '*Por outro lado* brings in the opposite side of the argument.', tag: 'contraste' },
   { id: 'cn-029', mode: 'conectivo', prompt: 'Ele saiu de casa cedo, ___ chegou antes de todos.', options: ['de modo que', 'embora', 'caso'], answer: 'de modo que', rule: '*De modo que* (so that, with the result that) introduces a consequence.', tag: 'consequência' },
   { id: 'cn-030', mode: 'conectivo', prompt: 'O exame deu negativo; ___, você não precisa de tratamento.', options: ['logo', 'pois', 'embora'], answer: 'logo', rule: '*Logo* (therefore) draws a conclusion from the fact before it.', tag: 'conclusão' },
-  { id: 'cn-031', mode: 'conectivo', prompt: '___ cuidar dos filhos, ela trabalha fora e faz faculdade.', options: ['Além de', 'Apesar de', 'Por causa de'], answer: 'Além de', rule: '*Além de* + infinitive adds something (besides, on top of).', tag: 'adição' },
+  { id: 'cn-031', mode: 'conectivo', prompt: '___ cuidar dos filhos, ela trabalha fora e faz faculdade.', options: ['Além de', 'Embora', 'Por causa de'], answer: 'Além de', rule: '*Além de* + infinitive adds something (besides, on top of). *Embora* needs a conjugated verb in the subjunctive.', tag: 'adição' },
   { id: 'cn-032', mode: 'conectivo', prompt: 'O voo atrasou ___ neblina.', options: ['por causa da', 'apesar da', 'além da'], answer: 'por causa da', rule: '*Por causa de* + noun gives the cause.', tag: 'causa' },
 
   // ===================== REGISTRO =====================

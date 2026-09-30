@@ -161,7 +161,7 @@ const base = process.argv[2] || 'file://' + path.resolve(__dirname, '..', 'index
   const title = await page.locator('a.mode[href="#/treino/genero"] .acc-bar i.b2').getAttribute('title').catch(() => null);
   if (!title) errors.push('decayed card not shown in box 2');
   await page.goto(base + '#/'); await page.waitForTimeout(150); await shot('path-after');
-  const strip2 = await page.locator('.today').textContent().catch(() => '');
+  const strip2 = await page.locator('.today:not(.backup)').textContent().catch(() => '');
   if (!/1 dia seguido/.test(strip2)) errors.push('streak strip: ' + strip2);
   if (!/revisar hoje/.test(strip2)) errors.push('review count missing: ' + strip2);
   await page.goto(base + '#/treino/revisao'); await page.waitForTimeout(150); await shot('revisao');

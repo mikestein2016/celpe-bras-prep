@@ -11,7 +11,7 @@
   var OPEN = CB.openings || null;
   var FORMAL = CB.formal || [];
   var LESSONS = (CB.lessons || []).slice().sort(function (a, b) { return a.n - b.n; });
-  var UNITS = { 1: 'Ler a proposta', 2: 'Usar a fonte', 3: 'Coesão', 4: 'Seus erros de língua', 5: 'Revisar e simular' };
+  var UNITS = { 1: 'Ler a proposta', 2: 'Usar a fonte', 3: 'Seus erros de língua', 4: 'Coesão', 5: 'Revisar e simular' };
 
   var CATS = {
     genero: { label: 'Gênero textual', en: 'genre markers and format' },
@@ -64,7 +64,58 @@
   st.writings = st.writings || [];
   st.lessonMisses = st.lessonMisses || [];
   st.days = st.days || {};
+  st.formalLog = st.formalLog || [];
+  // Formal rewrites used to share the writings list and push real texts out of it.
+  st.writings = st.writings.filter(function (w) {
+    if (String(w.q).indexOf('Passe para o formal: ') !== 0) return true;
+    st.formalLog.push({ id: String(w.k).replace(/^F:/, ''), text: w.text, at: w.at }); return false;
+  });
   function save() { try { localStorage.setItem(KEY, JSON.stringify(st)); } catch (e) { /* private mode: keep in memory */ } }
+  // Ask the browser not to clear this site's storage on its own (Safari clears it after 7 days without a visit).
+  try { if (navigator.storage && navigator.storage.persist) navigator.storage.persisted().then(function (p) { if (!p) navigator.storage.persist(); }).catch(function () {}); } catch (e) { /* not supported */ }
+  function hasProgress() { return !!(Object.keys(st.cards).length || Object.keys(st.lessons).length || Object.keys(st.days).length || st.writings.length); }
+
+  /* ---------- backup and restore ---------- */
+  // One file serves both jobs: Claude reads the summary, and Restaurar reads `state`.
+  function downloadBackup() {
+    st.lastBackup = new Date().toISOString(); save();
+    var data = exportData(); data.state = st;
+    var blob = new Blob([JSON.stringify(data)], { type: 'application/json' });
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'celpe-progresso-' + dayKey() + '.json';
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(function () { URL.revokeObjectURL(a.href); }, 2000);
+  }
+  function pickBackup() {
+    var inp = document.createElement('input');
+    inp.type = 'file'; inp.accept = '.json,application/json';
+    inp.onchange = function () {
+      var f = inp.files && inp.files[0]; if (!f) return;
+      var r = new FileReader();
+      r.onload = function () {
+        var obj; try { obj = JSON.parse(r.result); } catch (e) { obj = null; }
+        if (!obj || obj.app !== 'celpe-bras-prep' || !obj.state || !obj.state.cards) { toast('Este arquivo não é um backup completo.'); return; }
+        var when = obj.exportedAt ? new Date(obj.exportedAt).toLocaleString('pt-BR') : 'data desconhecida';
+        if (!confirm('Restaurar o backup de ' + when + '? Ele substitui o progresso deste aparelho.')) return;
+        try { localStorage.setItem(KEY, JSON.stringify(obj.state)); } catch (e) { toast('Não foi possível salvar neste aparelho.'); return; }
+        location.hash = '#/'; location.reload();
+      };
+      r.readAsText(f);
+    };
+    document.body.appendChild(inp); inp.click(); setTimeout(function () { inp.remove(); }, 60000);
+  }
+  function backupStrip() {
+    if (!hasProgress()) return '<div class="today backup"><div class="today-l"><div class="today-streak">Nenhum progresso neste aparelho</div><div class="small muted">Se você salvou um backup, restaure-o aqui.</div></div><button class="btn small primary" data-backup="restore">Restaurar</button></div>';
+    var last = st.lastBackup ? Date.parse(st.lastBackup) : 0, age = Math.floor((Date.now() - last) / 86400000);
+    if (last && age < 3) return '';
+    return '<div class="today backup"><div class="today-l"><div class="small muted">' + (last ? 'Último backup há ' + age + ' dias.' : 'Nenhum backup ainda.') + ' Salve um arquivo no aparelho para não perder o progresso.</div></div><button class="btn small" data-backup="save">Salvar backup</button></div>';
+  }
+  function bindBackupButtons() {
+    app.querySelectorAll('[data-backup]').forEach(function (b) {
+      b.onclick = function () { if (b.dataset.backup === 'save') { downloadBackup(); route(); } else pickBackup(); };
+    });
+  }
 
   /* ---------- text helpers ---------- */
   function esc(s) {
@@ -168,7 +219,10 @@
     var days = Math.max(1, d);
     var lead = left + (left === 1 ? ' lesson' : ' lessons') + ' left and ' + days + (days === 1 ? ' day' : ' days') + ' to study, counting today.';
     if (left <= days) return lead + ' One a day gets you there.';
-    return lead + ' Do ' + Math.ceil(left / days) + ' a day to finish on time.';
+    var per = Math.floor(left / days), extra = left - per * days;
+    if (!extra) return lead + ' Do ' + per + ' a day to finish on time.';
+    if (per === 1) return lead + ' Do one a day and double up on ' + (extra === 1 ? 'one day.' : extra + ' days.');
+    return lead + ' Do ' + per + ' a day, and ' + (per + 1) + ' on ' + extra + ' of those days.';
   }
   function viewPath() {
     var d = daysLeft();
@@ -176,7 +230,7 @@
     var cur = nextLesson();
     var out = '<div class="eyebrow">Trilha</div><h1>Celpe-Bras: Parte Escrita</h1>';
     if (d > 0) out += '<div class="countdown"><b>' + d + '</b><span>' + (d === 1 ? 'dia' : 'dias') + ' até a Parte Escrita, 20 de outubro às 9h</span></div>';
-    out += todayStrip();
+    out += backupStrip() + todayStrip();
     if (!LESSONS.length) return out + '<p class="empty">No lessons loaded.</p>';
     out += '<div class="path-top"><div class="path-count"><b>' + doneN + '</b> de ' + LESSONS.length + ' lições</div><div class="progress"><i style="width:' + Math.round(100 * doneN / LESSONS.length) + '%"></i></div><p class="small muted" style="margin:0">' + esc(paceLine(LESSONS.length - doneN)) + '</p></div>';
     var unit = null;
@@ -209,6 +263,7 @@
     return out;
   }
   function bindPath() {
+    bindBackupButtons();
     var cur = nextLesson();
     var el = cur && document.getElementById('node-' + cur.id);
     if (el && el.getBoundingClientRect().bottom > window.innerHeight - 40) el.scrollIntoView({ block: 'center' });
@@ -254,7 +309,7 @@
   function shuffle(a) { a = a.slice(); for (var i = a.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)); var t = a[i]; a[i] = a[j]; a[j] = t; } return a; }
   function drawCards(spec, taken) {
     var modes = spec.modes && spec.modes.length ? spec.modes : null, tags = spec.tags && spec.tags.length ? spec.tags : null;
-    var ok = function (d) { return !taken[d.id] && (!modes || modes.indexOf(d.mode) >= 0); };
+    var ok = function (d) { return !taken[d.id] && !taken['T' + d.id] && (!modes || modes.indexOf(d.mode) >= 0); };
     var pool = DRILLS.filter(function (d) { return ok(d) && (!tags || tags.indexOf(d.tag) >= 0); }).map(function (d) { return d.id; });
     if (pool.length < spec.n) pool = pool.concat(DRILLS.filter(function (d) { return ok(d) && pool.indexOf(d.id) < 0; }).map(function (d) { return d.id; }));
     var out = [];
@@ -276,7 +331,28 @@
       idx.forEach(function (i) { expand(step.from[i], key + ':' + i, taken, items); });
       return;
     }
-    items.push({ k: key });
+    items.push({ k: key, h: sigOf(step) });
+  }
+  // A saved run stores each lesson step's signature, so a step edited after the run was built is skipped instead of crashing.
+  function sigOf(step) {
+    var s = JSON.stringify(step), h = 5381;
+    for (var i = 0; i < s.length; i++) h = ((h << 5) + h + s.charCodeAt(i)) | 0;
+    return h;
+  }
+  function stepFor(item) {
+    var s = resolve(item.k);
+    return s && item.h != null && s.type && sigOf(s) !== item.h ? null : s;
+  }
+  // Runs saved before signatures existed: drop any answer or work whose shape does not fit the step now at that position.
+  function sanitize(s, run, pos) {
+    if (!s) return;
+    var a = run.ans[pos], w = run.work && run.work[pos], bad = false, badW = false;
+    if (s.type === 'fix') { bad = a && !a.hits; badW = w && !w.flags; }
+    else if (s.type === 'order') { badW = w && !(w.shuffled && w.shuffled.length === s.items.length && w.built.every(function (i) { return i < s.items.length; })); bad = a && badW; }
+    else if (s.type === 'choice') bad = a && a.given == null;
+    else if (s.type === 'write') badW = w && (typeof w.text !== 'string' || !w.checks);
+    if (bad) delete run.ans[pos];
+    if (badW) delete run.work[pos];
   }
   function buildRun(L) {
     var items = [], taken = {};
@@ -356,10 +432,12 @@
     s = s.replace(/\s+/g, ' ').replace(/\s+([,.;:!?])/g, '$1').trim();
     var n = s.split(' ').length;
     if (n < 4 || n > 18 || !/[.!?]$/.test(s)) return null;
+    // Digits and acronyms are read aloud as words or letters, so what he hears can't be typed back as written.
+    if (/\d/.test(s) || /(^|[\s(])[A-ZÁÉÍÓÚÂÊÔÃÕÇ]{2,}(?=[\s,.;:!?)]|$)/.test(s)) return null;
     return s.charAt(0).toUpperCase() + s.slice(1);
   }
   function drawDictation(n, modes, taken) {
-    var pool = DRILLS.filter(function (d) { return !taken['T' + d.id] && (!modes || modes.indexOf(d.mode) >= 0) && dictText(d); }).map(function (d) { return d.id; });
+    var pool = DRILLS.filter(function (d) { return !taken['T' + d.id] && !taken[d.id] && (!modes || modes.indexOf(d.mode) >= 0) && dictText(d); }).map(function (d) { return d.id; });
     var out = [];
     while (out.length < n && pool.length) {
       var tot = 0; pool.forEach(function (id) { tot += weight(id); });
@@ -468,9 +546,9 @@
   function formalChecks(f, text) {
     var T = normFormal(text), Tl = strip(T);
     return (f.changes || []).map(function (c) {
-      var to = normFormal(c.to), from = normFormal(c.from);
-      var found = T.indexOf(to) >= 0;
-      var looseFound = !found && Tl.indexOf(strip(to)) >= 0;
+      var tos = [c.to].concat(c.alt || []).map(normFormal), from = normFormal(c.from);
+      var found = tos.some(function (to) { return T.indexOf(to) >= 0; });
+      var looseFound = !found && tos.some(function (to) { return Tl.indexOf(strip(to)) >= 0; });
       var fromLeft = from.trim() && T.indexOf(from) >= 0;
       return { c: c, found: found, loose: looseFound, fromLeft: fromLeft };
     });
@@ -537,8 +615,9 @@
     if (!run) { location.replace(ctx.base); return null; }
     if (run.finished && k > run.items.length) { location.replace(ctx.base + '/fim'); return null; }
     if (!(k >= 1) || k > run.i + 1 || k > run.items.length) { location.replace(ctx.base + '/' + Math.min(run.i + 1, run.items.length)); return null; }
-    var pos = k - 1, item = run.items[pos], step = resolve(item.k);
-    player = { ctx: ctx, run: run, pos: pos, item: item, step: step };
+    var pos = k - 1, item = run.items[pos], step = stepFor(item);
+    sanitize(step, run, pos);
+    player ={ ctx: ctx, run: run, pos: pos, item: item, step: step };
     var out = '<div class="run-head"><div class="round-head"><div class="eyebrow" style="margin:0">' + esc(ctx.title) + '</div><a class="small muted" href="' + ctx.exit + '">Sair</a></div>';
     out += '<div class="progress" title="' + k + ' de ' + run.items.length + '"><i style="width:' + Math.round(100 * pos / run.items.length) + '%"></i></div></div>';
     out += '<div class="step" id="step">' + stepHtml() + '</div>';
@@ -551,7 +630,7 @@
   function againNote() { return player.item.r ? '<span class="chip warn">De novo</span> ' : ''; }
   function stepHtml() {
     var s = player.step, a = player.run.ans[player.pos];
-    if (!s) return '<p class="empty">This item no longer exists.</p>' + nextBtn();
+    if (!s) return '<p class="empty">This item changed after you started the lesson, so it is skipped.</p>' + nextBtn();
     switch (s.type) {
       case 'card': return cardStepHtml(s.card, a);
       case 'teach': return teachHtml(s);
@@ -733,7 +812,7 @@
     var run = player.run, a = extra || {};
     a.ok = ok;
     if (player.step && player.step.type !== 'card') logActivity();
-    if (!ok && !player.item.r && !run.retried[player.item.k]) { run.retried[player.item.k] = 1; run.items.push({ k: player.item.k, r: 1 }); a.retry = true; }
+    if (!ok && !player.item.r && !run.retried[player.item.k]) { run.retried[player.item.k] = 1; run.items.push({ k: player.item.k, h: player.item.h, r: 1 }); a.retry = true; }
     run.ans[player.pos] = a;
     save();
     rerender();
@@ -743,6 +822,8 @@
     var P = player, s = P.step, run = P.run, a = run.ans[P.pos];
     var nx = document.getElementById('next');
     if (nx) nx.onclick = function () {
+      if (run.finished) { location.hash = P.ctx.base + '/fim'; return; }
+      accentWork = null;
       if (P.pos === run.i) run.i++;
       if (run.i >= run.items.length) { finishRun(P.ctx, run); save(); location.hash = P.ctx.base + '/fim'; return; }
       save(); location.hash = P.ctx.base + '/' + (P.pos + 2);
@@ -803,12 +884,17 @@
     } else if (s.type === 'write') {
       var ww = run.work[P.pos], ta = document.getElementById('w-text'), show = document.getElementById('w-show');
       ta.oninput = function () { ww.text = ta.value; show.disabled = wordCount(ta.value) < 3; save(); };
-      show.onclick = function () {
-        st.writings.push({ k: P.item.k, q: s.q, text: ww.text, at: new Date().toISOString() });
-        if (st.writings.length > 80) st.writings = st.writings.slice(-80);
-        run.ans[P.pos] = { wrote: 1 }; logActivity(); save(); rerender();
+      var keep = function (extra) {
+        var e = { k: P.item.k, q: s.q, text: ww.text, at: new Date().toISOString() };
+        for (var x in extra) e[x] = extra[x];
+        st.writings.push(e);
+        if (st.writings.length > 300) st.writings = st.writings.slice(-300);
       };
-      document.getElementById('w-skip').onclick = function () { run.ans[P.pos] = { skipped: 1 }; save(); rerender(); };
+      show.onclick = function () { keep({}); run.ans[P.pos] = { wrote: 1 }; logActivity(); save(); rerender(); };
+      document.getElementById('w-skip').onclick = function () {
+        if (wordCount(ww.text) >= 3) keep({ skipped: true });
+        run.ans[P.pos] = { skipped: 1 }; save(); rerender();
+      };
     } else if (s.type === 'dict') {
       var dw = run.work[P.pos], dta = document.getElementById('d-text'), dchk = document.getElementById('d-check');
       var play = function (rate) { dw.plays = (dw.plays || 0) + 1; save(); speak(s.text, rate); };
@@ -834,8 +920,8 @@
         var C = formalChecks(s.item, fw2.text), ok = C.every(function (x) { return x.found; });
         st.formalSeen = st.formalSeen || {}; st.formalSeen[s.item.id] = (st.formalSeen[s.item.id] || 0) + 1;
         if (!ok) recordMiss('formal', { q: s.item.informal }, fw2.text);
-        st.writings.push({ k: P.item.k, q: 'Passe para o formal: ' + s.item.informal, text: fw2.text, at: new Date().toISOString() });
-        if (st.writings.length > 80) st.writings = st.writings.slice(-80);
+        st.formalLog.push({ id: s.item.id, text: fw2.text, ok: ok, at: new Date().toISOString() });
+        if (st.formalLog.length > 200) st.formalLog = st.formalLog.slice(-200);
         settle(ok, { checks: C, given: fw2.text });
       };
     } else if (s.type === 'prompt') {
@@ -847,7 +933,7 @@
   function runSummary(run) {
     var first = 0, firstOk = 0, fixFound = 0, fixTotal = 0, wrote = 0, misses = [];
     run.items.forEach(function (it, pos) {
-      var a = run.ans[pos], s = resolve(it.k); if (!a || !s) return;
+      var a = run.ans[pos], s = stepFor(it); if (!a || !s) return;
       if (s.type === 'fix') { fixFound += a.found || 0; fixTotal += a.total || 0; return; }
       if (s.type === 'write') { if (a.wrote) wrote++; return; }
       if (it.r || a.ok == null) return;
@@ -1060,9 +1146,17 @@
     var g = GENRE[p.genre];
     var out = (query.de ? '<div class="btn-row" style="margin-top:0"><a class="btn small" href="#/' + esc(query.de) + '">‹ Voltar à lição</a></div>' : '') + '<div class="eyebrow">' + taskLabel(p.task) + ' · ' + (g ? esc(g.name) : '') + '</div><h1>' + esc(p.label) + '. ' + esc(p.title) + '</h1>';
     out += '<div class="timer"><span class="timer-digits" id="t-digits">' + fmt(p.minutes * 60) + '</span><button class="btn primary" id="t-start">Começar</button><button class="btn ghost" id="t-reset">Zerar</button></div>';
-    if (p.task <= 2 && p.source && p.source.kind !== 'texto') out += '<p class="muted small">In the exam this is a ' + (p.source.kind === 'video' ? 'video' : 'recording') + ' played twice. Here you get the transcript: read it once, cover it, then write.</p>';
-    out += '<div class="enunciado"><b>Enunciado</b>' + md(p.prompt) + '</div>';
-    out += sourceBlock(p.source);
+    var heard = p.task <= 2 && p.source && p.source.kind !== 'texto', what = heard && (p.source.kind === 'video' ? 'video' : 'recording');
+    if (heard && 'speechSynthesis' in window) {
+      out += '<p class="muted small">In the exam this is a ' + what + ' played twice. Listen twice and take notes, then write. The transcript is below for checking afterward, or to read instead.</p>';
+      out += '<div class="enunciado"><b>Enunciado</b>' + md(p.prompt) + '</div>';
+      out += '<div class="btn-row"><button class="btn primary" id="au-play">Ouvir (1ª vez)</button></div>';
+      out += '<details class="reveal"><summary>Transcrição</summary>' + sourceBlock(p.source) + '</details>';
+    } else {
+      if (heard) out += '<p class="muted small">In the exam this is a ' + what + ' played twice. Here you get the transcript: read it once, cover it, then write.</p>';
+      out += '<div class="enunciado"><b>Enunciado</b>' + md(p.prompt) + '</div>';
+      out += sourceBlock(p.source);
+    }
     out += '<details class="reveal"><summary>After writing: what the grader expects</summary>' + list(p.checklist, 'checklist') + '</details>';
     var mdl = MODELS[p.id];
     if (mdl) out += '<details class="reveal model"><summary>After writing: model answer' + (mdl.wordCount ? ' <span class="chip">' + mdl.wordCount + ' palavras</span>' : '') + '</summary><p class="muted small">Tap any highlight to see why it earns points. Compare it with yours: the role, each checklist item, the source facts you used, and the two proofreading passes.</p>' + modelBlock(mdl) + '</details>';
@@ -1097,7 +1191,23 @@
       save(); route();
     };
     bindSample(MODELS[p.id]);
-    cleanup = function () { clearInterval(iv); };
+    var au = document.getElementById('au-play'), plays = 0, talking = false, gen = 0;
+    var auLabel = function () { au.textContent = talking ? 'Parar' : plays === 0 ? 'Ouvir (1ª vez)' : plays === 1 ? 'Ouvir (2ª vez)' : 'Ouvir de novo'; };
+    if (au) au.onclick = function () {
+      var ss = window.speechSynthesis;
+      ss.cancel();
+      if (talking) { talking = false; gen++; auLabel(); return; }
+      // One utterance per line: long single utterances get cut off in some browsers.
+      var lines = (p.source.body || []).map(function (l) { return l.replace(/^([^:]{1,40}):\s/, '$1. '); });
+      talking = true; plays++; auLabel(); var my = ++gen;
+      lines.forEach(function (l, i) {
+        var u = new SpeechSynthesisUtterance(l);
+        u.lang = 'pt-BR'; u.rate = 1; if (ptVoice) u.voice = ptVoice;
+        if (i === lines.length - 1) u.onend = function () { if (my !== gen) return; talking = false; if (document.body.contains(au)) auLabel(); };
+        ss.speak(u);
+      });
+    };
+    cleanup = function () { clearInterval(iv); if (au && 'speechSynthesis' in window) window.speechSynthesis.cancel(); };
   }
 
   /* ---------- sheet for highlights ---------- */
@@ -1135,10 +1245,13 @@
     return Math.max(1, c.box - Math.floor(late / (7 * DAY)));
   }
   function isDue(c, now) { return c && c.box > 0 && c.box < 5 && c.due && Date.parse(c.due) <= (now || Date.now()); }
+  // Due dates fall at local midnight, so "tomorrow" means any time tomorrow, not 24 hours later.
+  function dueAfter(from, days) { var d = new Date(from); return new Date(d.getFullYear(), d.getMonth(), d.getDate() + days).toISOString(); }
   (function migrate() {
     Object.keys(st.cards).forEach(function (id) {
       var c = st.cards[id];
-      if (c.box > 0 && !c.due) c.due = new Date(Date.parse(c.last || new Date().toISOString()) + INTERVAL[Math.min(c.box, 4)] * DAY).toISOString();
+      if (c.box > 0 && !c.due) c.due = dueAfter(Date.parse(c.last || new Date().toISOString()), INTERVAL[Math.min(c.box, 4)]);
+      else if (c.due) c.due = dueAfter(Date.parse(c.due), 0);
     });
   })();
   function modeStats(mode) {
@@ -1258,6 +1371,8 @@
     var base = strip(d.word);
     if (!accentWork || accentWork.id !== d.id) accentWork = { id: d.id, chars: base.split(''), sel: null };
     var ans = R.answered, ok = ans && R.given === d.word;
+    // After a reload the tiles are rebuilt from the saved answer, not from the plain word.
+    if (ans && R.given && R.given.length === base.length) accentWork.chars = R.given.split('');
     var out = '<div class="mode-tag">Acentos · tap a letter</div>';
     if (d.context) out += '<div class="drill-sentence">' + blankify(d.context, ans ? d.word : '…', ans ? 'good' : '') + '</div>';
     else out += '<div class="drill-sentence muted small">Does this word need an accent?</div>';
@@ -1300,7 +1415,7 @@
     if (ok) {
       c.right++;
       var eb = effBox(c);
-      if (!eb || isDue(c)) { c.box = Math.min(eb + 1, 5); c.due = c.box < 5 ? new Date(Date.now() + INTERVAL[c.box] * DAY).toISOString() : null; }
+      if (!eb || isDue(c)) { c.box = Math.min(eb + 1, 5); c.due = c.box < 5 ? dueAfter(Date.now(), INTERVAL[c.box]) : null; }
     } else {
       c.wrong++; c.box = 0; c.due = null; c.lastWrong = given;
       st.history.push({ id: d.id, given: given, at: c.last });
@@ -1388,9 +1503,10 @@
     var worst = DRILLS.filter(function (d) { var c = st.cards[d.id]; return c && c.wrong; })
       .sort(function (a, b) { var ca = st.cards[a.id], cb = st.cards[b.id]; return (cb.wrong - cb.right * 0.5) - (ca.wrong - ca.right * 0.5); }).slice(0, 15);
     out += '<h2>Most missed</h2>' + (worst.length ? '<div class="card">' + worst.map(missRow).join('') + '</div>' : '<p class="empty">Nothing missed yet.</p>');
-    out += '<h2>Send your progress to Claude</h2><p>Download the file or copy it, then send it in chat. It lists every miss and what you chose, so the next cards can target them.</p>';
-    out += '<div class="btn-row stretch"><button class="btn primary" id="exp-dl">Baixar arquivo</button><button class="btn" id="exp-copy">Copiar</button></div>';
-    out += '<details class="reveal"><summary>Reset progress</summary><p class="small">Clears drill history and practice check marks on this device. Export first if you want to keep them.</p><button class="btn danger" id="reset">Apagar tudo</button></details>';
+    out += '<h2>Backup and sending to Claude</h2><p>Salvar backup saves one file to this device (on iPhone, Files → Downloads). It holds all your progress, so Restaurar can bring it back on this or another device, and it is also the file to send Claude in chat. Copiar copies only the summary of misses and texts.</p>';
+    out += '<p class="small muted">' + (st.lastBackup ? 'Último backup: ' + new Date(st.lastBackup).toLocaleString('pt-BR') + '.' : 'Nenhum backup ainda.') + '</p>';
+    out += '<div class="btn-row stretch"><button class="btn primary" data-backup="save">Salvar backup</button><button class="btn" data-backup="restore">Restaurar</button><button class="btn" id="exp-copy">Copiar</button></div>';
+    out += '<details class="reveal"><summary>Reset progress</summary><p class="small">Clears all progress on this device. Save a backup first if you want to keep it.</p><button class="btn danger" id="reset">Apagar tudo</button></details>';
     return out;
   }
   function exportData() {
@@ -1405,18 +1521,11 @@
       app: 'celpe-bras-prep', version: 2, exportedAt: new Date().toISOString(),
       rounds: st.rounds, sessions: st.sessions || 0, overall: modeStats('mix'), byMode: byMode,
       lessons: st.lessons, streak: streakDays(), days: st.days, dictation: st.dict || null, practiceDone: st.done, misses: misses, recentWrongAnswers: wrongAnswers,
-      lessonMisses: st.lessonMisses.slice(-80), writings: st.writings.slice(-40)
+      lessonMisses: st.lessonMisses.slice(-80), writings: st.writings, formalRewrites: st.formalLog.slice(-60)
     };
   }
   function bindProgress() {
-    document.getElementById('exp-dl').onclick = function () {
-      var blob = new Blob([JSON.stringify(exportData(), null, 2)], { type: 'application/json' });
-      var a = document.createElement('a');
-      a.href = URL.createObjectURL(blob);
-      a.download = 'celpe-progresso-' + new Date().toISOString().slice(0, 10) + '.json';
-      document.body.appendChild(a); a.click(); a.remove();
-      setTimeout(function () { URL.revokeObjectURL(a.href); }, 2000);
-    };
+    bindBackupButtons();
     document.getElementById('exp-copy').onclick = function () {
       var txt = JSON.stringify(exportData(), null, 1);
       var done = function () { toast('Copiado'); };
@@ -1429,7 +1538,8 @@
     };
     document.getElementById('reset').onclick = function () {
       if (!confirm('Apagar todo o progresso deste aparelho?')) return;
-      st = { cards: {}, done: {}, history: [], rounds: 0, lessons: {}, runs: {}, writings: [], lessonMisses: [] }; save(); route();
+      try { localStorage.removeItem(KEY); } catch (e) { /* nothing stored */ }
+      location.hash = '#/'; location.reload();
     };
   }
 

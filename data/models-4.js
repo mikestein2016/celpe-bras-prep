@@ -3,9 +3,9 @@ CB.models = CB.models || {};
 
 CB.models["o-catadores"] = {
   answer: [
-    "{{1|Vale do Sol, 24 de fevereiro de 2026}}",
+    "{{1|Serratinga, 24 de fevereiro de 2026}}",
     "{{1|Prezados editores,}}",
-    "{{2|Li o balanço do carnaval publicado pelo Diário do Vale no último domingo. A matéria elogiou a organização da festa, mas deixou de fora as pessoas que limparam as ruas depois dos blocos.}}",
+    "{{2|Li o balanço do carnaval publicado pelo Correio Ribeirinho no último domingo. A matéria elogiou a organização da festa, mas deixou de fora as pessoas que limparam as ruas depois dos blocos.}}",
     "{{3|Moro na Avenida Beira-Rio}} {{4|há doze anos}}. {{3|Na manhã seguinte ao último bloco, a avenida já estava limpa.}} Isso foi obra dos catadores da Cooperativa Recicla Vida. {{5|Em quatro dias de festa, os sessenta cooperados recolheram dezoito toneladas de latas e garrafas PET, que serão vendidas}} {{6|à indústria em vez de irem}} {{5|para o aterro. Eles trabalharam a noite inteira atrás dos blocos, e alguns caminharam mais de vinte quilômetros por dia.}}",
     "{{7|Esse trabalho, porém,}} é feito em condições difíceis. {{8|O galpão da cooperativa é pequeno e cheio de goteiras, e o grupo precisa alugar um caminhão.}} {{7|Além disso,}} {{9|nem todos os cooperados têm}} {{8|luvas e botas, e a cidade não paga pelo serviço.}}",
     "{{7|Por isso,}} {{10|peço que a prefeitura ofereça um apoio concreto}}: {{8|um galpão maior, um caminhão próprio, equipamentos de proteção e um contrato que}} {{10|remunere}} {{8|a cooperativa pela limpeza.}} {{11|A prefeitura afirmou que estuda ampliar a parceria, mas uma promessa sem prazo não basta.}} {{12|Quem limpa a cidade merece mais do que um agradecimento.}}",
@@ -27,7 +27,7 @@ CB.models["o-catadores"] = {
     { n: 12, cat: "registro", text: "The closing sums up the letter in one sentence that is firm without being rude. There is no insult to the city and no exclamation mark, which fits a reader writing to a newspaper for all its readers to see." }
   ],
   why5: "The letter fits its context. A resident of the avenue writes to the paper that published the carnival review and to its readers, and he asks the city to act. It follows the genre: place and date, *Prezados editores*, a first paragraph that names the article and states the position, the writer's own experience, a request and a role signature. It covers the three parts of the prompt in order: recognition of the work, the co-op's difficulties and a concrete request. The source is used almost in full (the numbers, the night work, the warehouse, the truck, the protective gear, the city's vague answer) and reworded, with no mention of a report. Reference words and connectors (*Esse trabalho, porém*, *Além disso*, *Por isso*) hold it together. The language shows *há* for elapsed time, the personal infinitive, crase, *têm* with its accent and *pedir que* with the subjunctive.",
-  wordCount: 216
+  wordCount: 213
 };
 
 CB.models["p-ansiedade-provas"] = {

@@ -20,8 +20,8 @@ CB.lessons.push(
           'The action verbs split the purpose into parts. *Relate, explique, solicite, sugira*: each one is a checkbox the grader will look for.'
         ],
         examples: [
-          { pt: 'Você mora em Ouro Branco e leu uma reportagem sobre a falta de médicos no posto de saúde.', en: 'Enunciador: a resident who read the report.' },
-          { pt: 'Escreva uma carta para a seção de leitores do jornal Diário do Vale...', en: 'Interlocutor: the editors and readers. Gênero: carta do leitor.' },
+          { pt: 'Você mora em Serratinga e leu uma reportagem sobre a falta de médicos no posto de saúde.', en: 'Enunciador: a resident who read the report.' },
+          { pt: 'Escreva uma carta para a seção de leitores do jornal Correio Ribeirinho...', en: 'Interlocutor: the editors and readers. Gênero: carta do leitor.' },
           { pt: '...relatando a sua experiência e sugerindo soluções.', en: 'Propósito: two checkboxes, relate and suggest.' }
         ]
       },
@@ -266,7 +266,7 @@ CB.lessons.push(
             q: 'How does a blog post open?',
             options: ['With a title and a question to *você*', 'With *Prezados leitores,*', 'With the place and the date'],
             answer: 'With a title and a question to *você*',
-            why: 'A blog post has no greeting line. The title opens it, and the first sentence speaks to the reader. *Prezados leitores* sounds stiff, and place and date belong to letters.'
+            why: 'The title opens a blog post, and the first sentence speaks to the reader. A friendly *Olá, pessoal!* is optional. *Prezados leitores* sounds stiff, and place and date belong to letters.'
           },
           {
             type: 'choice',
@@ -467,7 +467,7 @@ CB.lessons.push(
         body: [
           'The greeting and the closing are genre markers. In two lines they show the grader who writes, who reads and how formal the text must be.',
           'Climb the ladder by distance. An office holder is addressed by title, a company gets *Prezados senhores*, a group you belong to gets *Caros*, a colleague gets *Bom dia* and a first name, a friend gets *Oi*.',
-          'Blog posts and flyers have no greeting. The title opens the text.'
+          'Blog posts and flyers open with a title. A greeting is optional on a blog (*Olá, pessoal!*) and rare on a flyer.'
         ],
         examples: [
           { pt: 'Prezado Senhor Secretário,', en: 'Most formal: an office holder addressed by title.' },
@@ -677,7 +677,7 @@ CB.lessons.push(
           {
             type: 'choice',
             q: 'Which fact is essential for the cyclists?',
-            text: 'Fonte: A partir de 1º de março, a companhia de trens urbanos de Vale do Sol vai permitir bicicletas em todos os vagões aos sábados e domingos. Nos dias úteis, as bicicletas continuam permitidas somente depois das 20h. Cada vagão aceita no máximo quatro bicicletas. A companhia comprou 40 trens novos em 2019. Segundo o gerente de operações, a medida atende a um pedido antigo dos ciclistas.\nTarefa: post no blog do grupo de ciclismo Pedal Livre, informando os membros sobre a mudança.',
+            text: 'Fonte: A partir de 1º de março, a companhia de trens urbanos de Serratinga vai permitir bicicletas em todos os vagões aos sábados e domingos. Nos dias úteis, as bicicletas continuam permitidas somente depois das 20h. Cada vagão aceita no máximo quatro bicicletas. A companhia comprou 40 trens novos em 2019. Segundo o gerente de operações, a medida atende a um pedido antigo dos ciclistas.\nTarefa: post no blog do grupo de ciclismo Pedal Livre, informando os membros sobre a mudança.',
             options: ['Bikes are allowed in every car on weekends from March 1', 'The company bought 40 trains in 2019', 'The operations manager commented on the change'],
             answer: 'Bikes are allowed in every car on weekends from March 1',
             why: 'The post informs cyclists about the change, so the new rule and its date come first. The trains bought in 2019 are background.'
@@ -734,7 +734,7 @@ CB.lessons.push(
       {
         type: 'write',
         q: 'Write 2 sentences for the Pedal Livre blog with the facts the cyclists need. Leave the rest out.',
-        text: 'Fonte: A partir de 1º de março, a companhia de trens urbanos de Vale do Sol vai permitir bicicletas em todos os vagões aos sábados e domingos. Nos dias úteis, as bicicletas continuam permitidas somente depois das 20h. Cada vagão aceita no máximo quatro bicicletas. A companhia comprou 40 trens novos em 2019. Segundo o gerente de operações, a medida atende a um pedido antigo dos ciclistas.',
+        text: 'Fonte: A partir de 1º de março, a companhia de trens urbanos de Serratinga vai permitir bicicletas em todos os vagões aos sábados e domingos. Nos dias úteis, as bicicletas continuam permitidas somente depois das 20h. Cada vagão aceita no máximo quatro bicicletas. A companhia comprou 40 trens novos em 2019. Segundo o gerente de operações, a medida atende a um pedido antigo dos ciclistas.',
         model: [
           'A partir de 1º de março, quem pedala vai poder levar a bicicleta em qualquer vagão do trem aos sábados e domingos.',
           'Nos dias úteis, nada muda: as bicicletas só entram depois das 20h, e cada vagão aceita no máximo quatro.'

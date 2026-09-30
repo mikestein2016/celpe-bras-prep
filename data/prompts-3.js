@@ -81,12 +81,12 @@ CB.prompts.push(
       ],
       note: "Stands in for a recording: read it once, cover it, then write."
     },
-    prompt: "Você trabalha no setor de Recursos Humanos da Tecelagem Bom Fio, em Blumenau. A empresa decidiu liberar os funcionários por até duas horas, sem desconto no salário, para que eles se vacinem contra a gripe nos postos de saúde. Com base na entrevista, escreva um aviso para o mural da empresa. Informe a decisão da empresa, explique quem pode se vacinar em cada período, onde e com quais documentos, e esclareça as dúvidas mais comuns sobre a vacina.",
+    prompt: "Você trabalha no setor de Recursos Humanos da Tecelagem Bom Fio, em Serratinga. A empresa decidiu liberar os funcionários por até duas horas, sem desconto no salário, para que eles se vacinem contra a gripe nos postos de saúde. Com base na entrevista, escreva um aviso para o mural da empresa. Informe a decisão da empresa, explique quem pode se vacinar em cada período, onde e com quais documentos, e esclareça as dúvidas mais comuns sobre a vacina.",
     checklist: [
       "Aviso format: a title (*AVISO*) with a subject line, an addressee (*Prezados colaboradores*), short blocks of information, a standard closing line and a signature by the department with place and date.",
       "Written by HR in the company's name (*informamos*) to all employees; opens with the campaign start (Monday the 13th) and the company's decision to release staff for up to two hours without a pay cut, and says how to arrange it.",
       "Who and when, in new words: until May 2, priority groups only (people 60 and over, children from six months to under six, pregnant women, health workers, teachers, people with chronic illnesses); from May 4 to 29, everyone from six months up.",
-      "Where and what to bring: any of the eighteen health posts, weekdays from 8 a.m. to 5 p.m., plus the Ginásio Municipal on Saturdays April 18 and 25 from 8 a.m. to 1 p.m.; photo ID and the vaccination card, plus a doctor's prescription or report for chronic illness.",
+      "Where and what to bring: any of the eighteen health posts, weekdays from 8 a.m. to 5 p.m., plus the Ginásio Municipal on Saturdays April 18 and 25 from 8 a.m. to 1 p.m.; photo ID and the vaccination card, plus a doctor's prescription or report for chronic illness and proof of employment (such as a badge) for teachers and health workers.",
       "Clears up doubts without adding medical claims: the vaccine does not cause flu, a sore arm or low fever for a day or two can happen, it must be taken every year, and anyone with a fever that day should wait.",
       "Spoken marks converted (*pra*, *tá*, *tipo*, *libera*, *vai ter*, *tem* for *há*), plural instructions (*levem*, *procurem*) and no mention of a radio program."
     ]

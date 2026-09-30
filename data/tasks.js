@@ -304,7 +304,7 @@ CB.tasks.push(
       'Writing an opinion text with no opposing view. Name the objection from the text and answer it (*É verdade que... No entanto...*).',
       'Writing *eu acho* in every paragraph or starting sentences with *Mas*. State the argument directly and use *No entanto* or *Porém*.',
       'Leaving verbs in the infinitive after *que* (*defendo que os moradores participar*). Write *participem*.',
-      'English calques such as *foi descoberto que*. Say who found it: *especialistas explicam que*.',
+      'Agentless phrases such as *foi descoberto que*, which read less naturally than saying who found it: *especialistas explicam que*.',
       'Leaving no time to proofread because this is the last task.'
     ],
     sample: {

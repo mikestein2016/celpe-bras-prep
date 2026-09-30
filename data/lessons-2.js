@@ -2,11 +2,11 @@ window.CB = window.CB || {};
 CB.lessons = CB.lessons || [];
 CB.lessons.push(
 
-  // ---------------------------------------------------------------- 8
+  // ---------------------------------------------------------------- 14
   {
     id: 'l08-adicao-contraste',
-    n: 8,
-    unit: 3,
+    n: 14,
+    unit: 4,
     title: 'Além disso, porém, no entanto',
     en: 'Add a point and set up a contrast with the connectors graders expect, including *embora* + subjunctive.',
     minutes: 12,
@@ -136,11 +136,11 @@ CB.lessons.push(
     ]
   },
 
-  // ---------------------------------------------------------------- 9
+  // ---------------------------------------------------------------- 15
   {
     id: 'l09-causa-conclusao',
-    n: 9,
-    unit: 3,
+    n: 15,
+    unit: 4,
     title: 'Porque, por isso, portanto',
     en: 'Say why, say what follows and what for, and close an argument with *portanto*.',
     minutes: 13,
@@ -287,11 +287,11 @@ CB.lessons.push(
     ]
   },
 
-  // ---------------------------------------------------------------- 10
+  // ---------------------------------------------------------------- 16
   {
     id: 'l10-referencia',
-    n: 10,
-    unit: 3,
+    n: 16,
+    unit: 4,
     title: 'Não repetir: pronomes e sinônimos',
     en: 'Point back to an idea without repeating the noun, and keep its gender right along the chain.',
     minutes: 12,
@@ -379,14 +379,14 @@ CB.lessons.push(
       },
       {
         type: 'fix',
-        title: 'The reference chain breaks four times. Find the mistakes.',
-        text: 'A Câmara Municipal de Vale do Sol aprovou na terça-feira uma lei que proíbe construções a menos de 50 metros das nascentes da cidade. {{O novo lei|A nova lei|*Lei* is feminine, so its article and adjective are too.}} entra em vigor em janeiro. Segundo o vereador Paulo Mendes, autor da proposta, {{ele|ela|The pronoun points back to *a lei*, not to the council member.}} vai proteger a água de cerca de 40 mil moradores. {{Esse medida|Essa medida|*Medida* is feminine.}} também prevê multas para quem desmatar as margens dos rios. Ambientalistas da região comemoraram {{o decisão|a decisão|*-são* nouns are feminine: *a decisão*.}}.'
+        title: 'Find the 4 places where the reference chain breaks.',
+        text: 'A Câmara Municipal de Serratinga aprovou na terça-feira uma lei que proíbe construções a menos de 50 metros das nascentes da cidade. {{O novo lei|A nova lei|*Lei* is feminine, so its article and adjective are too.}} entra em vigor em janeiro. Segundo o vereador Paulo Mendes, autor da proposta, {{ele|ela|The pronoun points back to *a lei*, not to the council member.}} vai proteger a água de cerca de 40 mil moradores. {{Esse medida|Essa medida|*Medida* is feminine.}} também prevê multas para quem desmatar as margens dos rios. Ambientalistas da região comemoraram {{o decisão|a decisão|*-são* nouns are feminine: *a decisão*.}}.'
       },
       {
         type: 'order',
         q: 'Put this blog paragraph in order. Follow the chain of references.',
         items: [
-          'A Biblioteca Pública de Vale do Sol lançou um serviço de empréstimo de livros digitais.',
+          'A Biblioteca Pública de Serratinga lançou um serviço de empréstimo de livros digitais.',
           'Esse serviço é gratuito para quem tem a carteirinha da biblioteca.',
           'Para usá-lo, basta baixar um aplicativo e fazer o cadastro.',
           'Isso leva menos de cinco minutos.',
@@ -414,20 +414,20 @@ CB.lessons.push(
     ]
   },
 
-  // ---------------------------------------------------------------- 11
+  // ---------------------------------------------------------------- 17
   {
     id: 'l11-paragrafos',
-    n: 11,
-    unit: 3,
+    n: 17,
+    unit: 4,
     title: 'Um parágrafo, uma ideia',
     en: 'Plan a 150 to 200 word text in three or four paragraphs, each with one idea and a topic sentence.',
     minutes: 15,
     steps: [
       {
         type: 'teach',
-        title: 'The shape of 150 to 200 words',
+        title: 'The shape of 150 to 220 words',
         body: [
-          'A text of 150 to 200 words fits in three or four paragraphs. The first gives the context and why you are writing. The middle one or two each carry one idea, with facts from the source. The last asks for the action: the request, the proposal, the invitation or the conclusion.',
+          'A text of 150 to 220 words fits in three or four paragraphs. The first gives the context and why you are writing. The middle one or two each carry one idea, with facts from the source. The last asks for the action: the request, the proposal, the invitation or the conclusion.',
           'Open each paragraph with a topic sentence that says what it is about. The sentences after it support that one idea. When a new idea starts, start a new paragraph.',
           'A rough budget: 30 to 40 words to open, 50 to 60 for each middle paragraph, about 30 to close.'
         ],
@@ -586,7 +586,7 @@ CB.lessons.push(
         type: 'teach',
         title: 'Pass 1: agreement',
         body: [
-          'Read only for agreement. Stop at every noun and check its article, its adjectives and any pronoun that points back to it. *-ção, -são, -dade, -gem, -tude* are feminine; *-ma* words such as *o problema* are masculine.',
+          'Read only for agreement. Stop at every noun and check its article, its adjectives and any pronoun that points back to it. *-ção, -são, -dade, -gem, -tude* are feminine, with rare exceptions (*o coração*; *personagem* takes either). Greek *-ma* words (*o problema, o sistema, o tema*) are masculine, but *a cama* and *a forma* are feminine.',
           'Then stop at every verb. Does it have a subject, and does it match? *As crianças passam*, not *passar*. *Os moradores reclamam*, not *reclama*.',
           'Traps worth checking twice: *a lei, a mão, a foto, o dia, o mapa*.'
         ],

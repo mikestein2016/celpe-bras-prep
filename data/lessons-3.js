@@ -2,11 +2,11 @@ window.CB = window.CB || {};
 CB.lessons = CB.lessons || [];
 CB.lessons.push(
 
-  // ===================== 12. O gênero dos substantivos =====================
+  // ===================== 8. O gênero dos substantivos =====================
   {
     id: 'l12-genero',
-    n: 12,
-    unit: 4,
+    n: 8,
+    unit: 3,
     title: 'O gênero dos substantivos',
     en: 'Predict a noun\'s gender from its ending and catch the exceptions that trip you up.',
     minutes: 13,
@@ -16,7 +16,7 @@ CB.lessons.push(
         title: 'Endings that give the gender away',
         body: [
           'Most of your gender slips happen on words whose ending tells you the answer. Learn the endings and most of the slips go away.',
-          'Feminine: *-ção, -são, -dade, -tude, -gem*. That covers *a proibição, a atenção, a decisão, a comunidade, a atitude, a viagem*.',
+          'Feminine: *-ção, -são, -dade, -tude, -gem*, with rare exceptions (*o coração*; *personagem* takes either). That covers *a proibição, a atenção, a decisão, a comunidade, a atitude, a viagem*.',
           'Masculine: Greek words in *-ma*, such as *o problema, o sistema, o tema, o programa, o clima*. Here the *-a* ending misleads you.'
         ],
         examples: [
@@ -94,11 +94,11 @@ CB.lessons.push(
     ]
   },
 
-  // ===================== 13. Tudo concorda =====================
+  // ===================== 9. Tudo concorda =====================
   {
     id: 'l13-concordancia',
-    n: 13,
-    unit: 4,
+    n: 9,
+    unit: 3,
     title: 'Tudo concorda',
     en: 'Carry a noun\'s gender and number to every word tied to it, even when that word is far away.',
     minutes: 13,
@@ -184,11 +184,11 @@ CB.lessons.push(
     ]
   },
 
-  // ===================== 14. Os acentos que você mais usa =====================
+  // ===================== 10. Os acentos que você mais usa =====================
   {
     id: 'l14-acentos',
-    n: 14,
-    unit: 4,
+    n: 10,
+    unit: 3,
     title: 'Os acentos que você mais usa',
     en: 'Put the accents on the words you write most, and leave off the ones the 2009 reform removed.',
     minutes: 14,
@@ -275,11 +275,11 @@ CB.lessons.push(
     ]
   },
 
-  // ===================== 15. Conjugue o verbo =====================
+  // ===================== 11. Conjugue o verbo =====================
   {
     id: 'l15-verbos',
-    n: 15,
-    unit: 4,
+    n: 11,
+    unit: 3,
     title: 'Conjugue o verbo',
     en: 'Conjugate every verb that has a subject, and choose the subjunctive or imperative when the sentence calls for it.',
     minutes: 14,
@@ -375,11 +375,11 @@ CB.lessons.push(
     ]
   },
 
-  // ===================== 16. Preposições e crase =====================
+  // ===================== 12. Preposições e crase =====================
   {
     id: 'l16-regencia-crase',
-    n: 16,
-    unit: 4,
+    n: 12,
+    unit: 3,
     title: 'Preposições e crase',
     en: 'Use the right preposition after common verbs, and write the crase only where *a + a* meet.',
     minutes: 14,
@@ -468,11 +468,11 @@ CB.lessons.push(
     ]
   },
 
-  // ===================== 17. Revisão da unidade =====================
+  // ===================== 13. Revisão da unidade =====================
   {
     id: 'l17-revisao-lingua',
-    n: 17,
-    unit: 4,
+    n: 13,
+    unit: 3,
     title: 'Revisão da unidade',
     en: 'Catch your gender, accent, verb and preposition slips with one proofreading routine.',
     minutes: 15,

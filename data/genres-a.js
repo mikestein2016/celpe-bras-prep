@@ -407,13 +407,13 @@ CB.genres.push(
       { use: 'É verdade que... No entanto,', avoid: 'Mas tem gente que diz...', why: 'The formal pair concedes the point and then answers it, and it avoids both *Mas* at the start and *tem gente*.' },
       { use: 'Em suma, / Portanto,', avoid: 'Então,', why: '*Então* as a conclusion marker belongs to speech.' },
       { use: 'a lei foi aprovada', avoid: 'a lei foi passada', why: '*Passar uma lei* is a calque of English "to pass a law". In Portuguese a law is *aprovada* by the legislature and *sancionada* by the executive.' },
-      { use: 'descobriu-se que / pesquisas mostram que', avoid: 'foi descoberto que', why: '*Foi descoberto que* copies the English "it was discovered that". The *se* construction or an active subject is the natural Portuguese form.' },
+      { use: 'descobriu-se que / pesquisas mostram que', avoid: 'foi descoberto que', why: '*Foi descoberto que* is grammatical but less natural. It mirrors English "it was discovered that", and the *se* construction or an active subject reads better.' },
       { use: 'lixo eletrônico', avoid: 'e-waste', why: 'Use the Portuguese term whenever one exists. English words in a formal article read as a gap in vocabulary.' }
     ],
     pitfalls: [
       'Summarizing the source instead of arguing. The source gives both sides; your job is to choose one and use the facts as evidence.',
       'Ignoring the other side. The prompt usually asks you to consider a counter-argument. Present it with *É verdade que* or *Alguns afirmam que*, then answer it.',
-      'English calques in formal writing: *foi passado* for a law (write *foi aprovada*), *foi descoberto que* (write *descobriu-se que*), English words like *e-waste* (write *lixo eletrônico*).',
+      'English calques in formal writing: *foi passado* for a law (write *foi aprovada*) and English words like *e-waste* (write *lixo eletrônico*). *Foi descoberto que* is less natural than *descobriu-se que* or a named agent.',
       'Run-on sentences. Keep one idea per sentence and let the connectors do the linking.',
       'Inventing statistics. Without a number from the source, write *muitas empresas* or *a maioria dos participantes*, never a made-up percentage.',
       'Forgetting the title. In this genre it is a scored genre marker.'

@@ -35,7 +35,7 @@ CB.formal.push(
   { id: 'fm-004',
     context: 'Aviso da administração aos moradores de um prédio',
     informal: 'Pessoal, a água vai tá cortada na quinta-feira, das 8h às 17h, então enche uns baldes antes, tá?',
-    formal: 'Senhores moradores, a água estará cortada na quinta-feira, das 8h às 17h, então solicitamos que encham alguns baldes antes.',
+    formal: 'Senhores moradores, a água estará cortada na quinta-feira, das 8h às 17h. Por isso, solicitamos que encham alguns baldes antes.',
     changes: [
       { from: 'Pessoal', to: 'Senhores moradores', why: 'A notice addresses the group formally.' },
       { from: 'vai tá cortada', to: 'estará cortada', why: '*Tá* is spoken; the synthetic future *estará* suits a formal notice.' },
@@ -49,7 +49,7 @@ CB.formal.push(
     formal: 'Gostaria de me candidatar à vaga de coordenador que o setor de RH divulgou ontem.',
     changes: [
       { from: 'Queria', to: 'Gostaria de', why: 'A polite formal request uses the conditional.' },
-      { from: 'aplicar pra', to: 'me candidatar à', why: '*Aplicar para* copies English apply for. You *candidatar-se a* a job, and *a* + *a vaga* gives *à*.' },
+      { from: 'aplicar pra', to: 'me candidatar à', alt: ['candidatar-me à'], why: '*Aplicar para* copies English apply for. You *candidatar-se a* a job, and *a* + *a vaga* gives *à*.' },
       { from: 'o pessoal do RH', to: 'o setor de RH', why: '*O pessoal* is spoken; name the department.' }
     ] },
 
@@ -86,10 +86,10 @@ CB.formal.push(
   { id: 'fm-009',
     context: 'Artigo de opinião para a revista do sindicato',
     informal: 'Tipo, a gente trabalha dez horas por dia e ganha que nem estagiário, né?',
-    formal: 'Trabalhamos dez horas por dia e ganhamos como estagiários.',
+    formal: 'Trabalhamos dez horas por dia e ganhamos o mesmo que estagiários.',
     changes: [
       { from: 'Tipo, a gente trabalha', to: 'Trabalhamos', why: 'Cut the filler *tipo*; *a gente* becomes the *nós* verb.' },
-      { from: 'ganha que nem', to: 'ganhamos como', why: 'Keep the *nós* form, and write *como* for *que nem*.' },
+      { from: 'ganha que nem', to: 'ganhamos o mesmo que', why: 'Keep the *nós* form. *Que nem* is spoken; for pay, write *o mesmo que*.' },
       { from: 'estagiário, né?', to: 'estagiários', why: 'Cut *né?*; the comparison is with interns in the plural.' }
     ] },
 
@@ -171,8 +171,9 @@ CB.formal.push(
   { id: 'fm-017',
     context: 'E-mail ao banco para contestar uma cobrança',
     informal: 'Apareceu uma cobrança de R$ 89,90 no meu cartão que eu não reconheço. Me manda o detalhamento dessa compra.',
-    formal: 'Apareceu uma cobrança de R$ 89,90 no meu cartão que não reconheço. Solicito que me enviem o detalhamento dessa compra.',
+    formal: 'Apareceu no meu cartão uma cobrança de R$ 89,90 que não reconheço. Solicito que me enviem o detalhamento dessa compra.',
     changes: [
+      { from: 'uma cobrança de R$ 89,90 no meu cartão', to: 'no meu cartão uma cobrança', why: 'Move *no meu cartão* forward so *que não reconheço* sits next to *cobrança*, the thing you do not recognize.' },
       { from: 'que eu não reconheço', to: 'que não reconheço', why: 'The verb ending already shows the subject; cut *eu*.' },
       { from: 'Me manda', to: 'Solicito que me enviem', why: 'Do not open with *me* or give an order; request with *solicito que* and the subjunctive.' }
     ] },
@@ -223,7 +224,7 @@ CB.formal.push(
   { id: 'fm-022',
     context: 'E-mail à diretora da creche do filho',
     informal: 'Meu filho tem alergia a amendoim, então me dá uma confirmação de que o lanche não leva amendoim.',
-    formal: 'Meu filho tem alergia a amendoim, então peço que a senhora confirme que o lanche não contém amendoim.',
+    formal: 'Meu filho tem alergia a amendoim. Por isso, peço que a senhora confirme que o lanche não contém amendoim.',
     changes: [
       { from: 'me dá', to: 'peço que a senhora', why: 'A request to a director you do not know well uses *peço que* and *a senhora*.' },
       { from: 'uma confirmação de', to: 'confirme', why: 'After *peço que*, use the verb in the subjunctive.' },
@@ -277,7 +278,7 @@ CB.formal.push(
     changes: [
       { from: 'Galera', to: 'Prezados alunos', why: '*Galera* is slang; a notice addresses the group formally.' },
       { from: 'vão tá suspensas', to: 'estarão suspensas', why: '*Tá* is spoken; the synthetic future *estarão* suits a formal notice.' },
-      { from: 'essa semana', to: 'nesta semana', why: 'For the current week, write *nesta semana*.' },
+      { from: 'essa semana', to: 'nesta semana', alt: ['esta semana'], why: 'For the current week, write *nesta semana* or *esta semana*.' },
       { from: 'tá doente', to: 'está doente', why: 'Write *está* in full.' }
     ] },
 
@@ -392,7 +393,7 @@ CB.formal.push(
     informal: 'Me inscrevi na corrida de 10 km, mas não peguei o kit nem o número de peito. E ninguém responde meus e-mails.',
     formal: 'Fiz a minha inscrição na corrida de 10 km, mas não recebi o kit nem o número de peito. Também não obtive resposta aos meus e-mails.',
     changes: [
-      { from: 'Me inscrevi', to: 'Fiz a minha inscrição', why: 'Do not open a sentence with *me*.' },
+      { from: 'Me inscrevi', to: 'Fiz a minha inscrição', alt: ['Inscrevi-me', 'Fiz minha inscrição', 'Eu me inscrevi'], why: 'Do not open a sentence with *me*. Write *inscrevi-me* or *fiz a minha inscrição*.' },
       { from: 'não peguei', to: 'não recebi', why: 'You *receber* a kit; *pegar* is spoken here.' },
       { from: 'E ninguém responde meus e-mails', to: 'resposta aos meus e-mails', why: 'State the fact without *ninguém*; *responder* and *resposta* take *a*, so write *aos meus e-mails*.' }
     ] },
@@ -410,7 +411,7 @@ CB.formal.push(
   { id: 'fm-040',
     context: 'Aviso da biblioteca pública aos leitores',
     informal: 'A biblioteca vai fechar pra reforma em julho, então quem pegou livro emprestado tem que devolver até dia 30.',
-    formal: 'A biblioteca vai fechar para reforma em julho, então quem retirou livros deve devolvê-los até o dia 30.',
+    formal: 'A biblioteca vai fechar para reforma em julho. Por isso, quem retirou livros deve devolvê-los até o dia 30.',
     changes: [
       { from: 'pra reforma', to: 'para reforma', why: 'Write *para* in full.' },
       { from: 'pegou livro emprestado', to: 'retirou livros', why: '*Retirar livros* is the library term.' },
@@ -436,7 +437,7 @@ CB.formal.push(
     changes: [
       { from: 'pegar meu histórico', to: 'obter meu histórico', why: 'You *obter* a document; *pegar* is spoken.' },
       { from: 'sexta,', to: 'sexta-feira', why: 'Write the weekday in full.' },
-      { from: 'tô aplicando pra', to: 'estou me candidatando a', why: '*Aplicar para* copies English apply for; write *candidatar-se a*.' }
+      { from: 'tô aplicando pra', to: 'estou me candidatando a', alt: ['candidatando-me a'], why: '*Aplicar para* copies English apply for; write *candidatar-se a*.' }
     ] },
 
   { id: 'fm-043',
@@ -451,10 +452,10 @@ CB.formal.push(
   { id: 'fm-044',
     context: 'E-mail ao suporte técnico de um programa de contabilidade',
     informal: 'Depois da atualização, o sistema tá travando toda hora, e aí eu perco o que tava fazendo.',
-    formal: 'Depois da atualização, o sistema trava com frequência, e então perco o que estava fazendo.',
+    formal: 'Depois da atualização, o sistema trava com frequência, e por isso perco o que estava fazendo.',
     changes: [
       { from: 'tá travando toda hora', to: 'trava com frequência', why: 'The simple present states a repeated problem; *toda hora* is spoken.' },
-      { from: 'e aí eu perco', to: 'e então perco', why: '*E aí* is spoken; *então* marks the result. The verb ending already shows *eu*.' },
+      { from: 'e aí eu perco', to: 'e por isso perco', why: '*E aí* is spoken; in writing, *por isso* marks the result. The verb ending already shows *eu*.' },
       { from: 'tava fazendo', to: 'estava fazendo', why: 'Write *estava* in full.' }
     ] },
 

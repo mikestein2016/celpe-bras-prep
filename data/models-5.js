@@ -68,21 +68,21 @@ CB.models['x-vacina-gripe'] = {
     '{{1|AVISO}}',
     '{{1|Assunto: vacinação contra a gripe}}',
     '{{2|Prezados colaboradores,}}',
-    '{{3|Informamos que a campanha de vacinação contra a gripe começa na segunda-feira, 13 de abril.}} {{4|A empresa liberará cada funcionário por até duas horas, sem desconto no salário. Combinem o horário com o supervisor.}}',
-    '{{5|Até 2 de maio, a vacina é destinada aos grupos prioritários: pessoas com 60 anos ou mais, crianças de seis meses a menos de seis anos, gestantes, profissionais de saúde, professores e pessoas com doenças crônicas.}} {{6|De 4 a 29 de maio,}} {{5|toda a população a partir de seis meses poderá se vacinar.}}',
-    'A vacina {{7|está disponível}} nos dezoito postos de saúde, {{8|de segunda a sexta-feira, das 8h às 17h}}. {{6|Além disso,}} nos sábados 18 e 25 de abril, {{7|haverá}} um posto extra no Ginásio Municipal, das 8h às 13h. {{9|Levem}} documento com foto e a carteira de vacinação. {{9|Quem tiver}} doença crônica deve apresentar também receita ou relatório médico.',
-    '{{6|Por fim,}} {{10|a vacina não causa gripe, pois não}} {{12|contém}} {{10|vírus vivo. Pode haver dor no braço ou febre baixa por um ou dois dias. É preciso se vacinar todos os anos, porque o vírus muda.}} {{9|Quem estiver}} com febre no dia {{10|deve adiar a vacinação}}.',
+    '{{3|Informamos que a vacinação contra a gripe começa na segunda-feira, 13 de abril.}} {{4|A empresa liberará cada funcionário por até duas horas, sem desconto salarial. Combinem o horário com o supervisor.}}',
+    '{{5|Até 2 de maio, a vacina é destinada aos grupos prioritários: pessoas com 60 anos ou mais, crianças de seis meses a menos de seis anos, gestantes, profissionais de saúde, professores e pessoas com doenças crônicas.}} {{6|De 4 a 29 de maio,}} {{5|todos a partir de seis meses poderão se vacinar.}}',
+    'A vacina {{7|está disponível}} nos dezoito postos de saúde, {{8|de segunda a sexta-feira, das 8h às 17h}}. {{6|Além disso,}} nos sábados 18 e 25 de abril, {{7|haverá}} um posto extra no Ginásio Municipal, das 8h às 13h. {{9|Levem}} documento com foto e carteira de vacinação. {{9|Quem tiver}} doença crônica deve apresentar também receita ou relatório médico. Professores e profissionais de saúde devem levar um comprovante de trabalho, como o crachá.',
+    '{{6|Por fim,}} {{10|a vacina não causa gripe, pois não}} {{12|contém}} {{10|vírus vivo. Pode haver dor no braço ou febre baixa por até dois dias. A vacinação deve ser anual, porque o vírus muda.}} {{9|Quem estiver}} com febre {{10|deve adiar a vacinação}}.',
     '{{11|Contamos com a participação de todos.}}',
     '{{11|Setor de Recursos Humanos}}',
     '{{11|Tecelagem Bom Fio}}',
-    '{{11|Blumenau, 8 de abril de 2026}}'
+    '{{11|Serratinga, 8 de abril de 2026}}'
   ],
   notes: [
     { n: 1, cat: 'genero', text: '*AVISO* and a subject line tell employees at a glance that this is an official notice and what it is about. On a bulletin board, the title is what makes people stop and read.' },
     { n: 2, cat: 'registro', text: '*Prezados colaboradores* is the standard formal address in company notices. It sets the plural for the whole text, so every instruction after it is plural too (*levem*, not *leve*).' },
     { n: 3, cat: 'papel', text: 'HR writes in the company\'s name with *Informamos que*, never as *eu*. The first sentence gives the reason for the notice: the campaign starts on Monday, April 13.' },
     { n: 4, cat: 'papel', text: 'The company\'s decision is the one piece of information only HR can give, and the prompt asks for it. The notice also says how to use it (*Combinem o horário com o supervisor*), which turns a policy into an action.' },
-    { n: 5, cat: 'fonte', text: 'The two periods, reworded. *É só pros grupos prioritários* becomes *é destinada aos grupos prioritários*, and *libera pra toda a população* becomes *toda a população ... poderá se vacinar*. The list of groups stays complete because readers need to know if they are in it.' },
+    { n: 5, cat: 'fonte', text: 'The two periods, reworded. *É só pros grupos prioritários* becomes *é destinada aos grupos prioritários*, and *libera pra toda a população* becomes *todos a partir de seis meses poderão se vacinar*. The list of groups stays complete because readers need to know if they are in it.' },
     { n: 6, cat: 'coesao', text: 'The notice moves in the order a reader needs: who, then where and when, then what to bring, then doubts. Dates open their sentences (*De 4 a 29 de maio*), *Além disso* adds the Saturday post, and *Por fim* opens the last block, the common doubts.' },
     { n: 7, cat: 'registro', text: '*A vacina está disponível* and *haverá um posto extra* are the written forms. *Tem vacina nos postos* and *vai ter um posto extra* are the spoken versions (the nurse uses *vai ter* on the radio), and they lower the register of an official notice.' },
     { n: 8, cat: 'lingua', text: 'Crase with times: *das 8h às 17h*, because *horas* is feminine. No crase with days of the week and no article: *de segunda a sexta-feira*.' },
@@ -92,7 +92,7 @@ CB.models['x-vacina-gripe'] = {
     { n: 12, cat: 'lingua', text: 'Accent. *Contém* (singular, *a vacina contém*) has an acute accent; *contêm* (plural, *as vacinas contêm*) has a circumflex. The same pair works for *mantém/mantêm*; the base verb has *tem/têm*.' }
   ],
   why5: 'The notice is written by HR in the company\'s name to all employees and does everything the prompt asks. It opens with the campaign date and the company\'s decision, including how to use the two hours. It then gives who can be vaccinated in each period, where and when, and what to bring, and it closes by answering the common doubts. All facts come from the interview (the priority groups, May 2, May 4 to 29, eighteen health posts, the Saturday post at the gym, the documents, the four doubts) in new words and in written register, with no mention of a radio program and no medical claim beyond the source. The blocks follow the order a reader needs and are linked by dates and connectors. The language models the plural imperative, *quem* + future subjunctive, crase with times, *haverá* for *vai ter* and the accent on *contém*.',
-  wordCount: 217
+  wordCount: 220
 };
 
 CB.models['y-patinetes'] = {
@@ -100,9 +100,9 @@ CB.models['y-patinetes'] = {
     '{{1|Porto Claro, 14 de outubro de 2026.}}',
     '{{1|Prezados editores,}}',
     '{{2|Li a reportagem "Patinetes elétricos: solução ou problema?" e gostaria de comentá-la}} {{3|como morador do Centro}}. {{4|Acredito que os patinetes podem continuar na cidade, desde que haja regras claras.}}',
-    '{{5|É verdade que}} o serviço é prático. {{6|Para trajetos curtos, como ir da estação de metrô ao escritório, o patinete é rápido e evita o trânsito.}} {{5|No entanto,}} {{6|desde a chegada dos oitocentos veículos, há seis meses,}} as calçadas {{7|passaram a servir de estacionamento}}. {{3|Na minha rua, vejo patinetes deixados no meio da calçada quase todos os dias, inclusive sobre a rampa de acessibilidade da esquina.}} {{6|Muitos usuários também andam em alta velocidade entre os pedestres. Em apenas três meses, 46 pessoas se feriram em acidentes, entre elas 12 pedestres.}}',
-    '{{6|A empresa responsável afirma que orienta os usuários pelo aplicativo,}} {{7|mas a situação mostra que isso não basta.}}',
-    '{{8|Por isso,}} {{9|a prefeitura deve aprovar a regulamentação}} o quanto antes. {{8|Em primeiro lugar,}} {{10|é preciso proibir a circulação nas calçadas e criar vagas próprias para os patinetes}}. {{8|Além disso,}} {{11|os usuários que deixarem o patinete em local inadequado}} devem ser multados, e {{10|a velocidade máxima deve ser menor nas ruas mais movimentadas}}.',
+    '{{5|É verdade que}} o serviço é prático. {{6|Para trajetos curtos, como ir da estação de metrô ao escritório, o patinete é rápido e evita o trânsito.}} {{5|No entanto,}} {{6|desde a chegada dos oitocentos veículos, há seis meses,}} as calçadas {{7|passaram a servir de estacionamento}}. {{3|Na minha rua, vejo patinetes deixados no meio da calçada quase todos os dias, inclusive sobre a rampa de acessibilidade da esquina.}} {{6|Muitos usuários também andam em alta velocidade entre os pedestres. Em três meses, 46 pessoas se feriram em acidentes, entre elas 12 pedestres.}}',
+    '{{6|A empresa afirma que orienta os usuários pelo aplicativo e limita a velocidade a 20 km/h,}} {{7|mas a situação mostra que isso não basta.}}',
+    '{{8|Por isso,}} {{9|a prefeitura deve aprovar a regulamentação}} com urgência. {{8|Em primeiro lugar,}} {{10|é preciso proibir a circulação nas calçadas e criar vagas próprias para os patinetes}}. {{8|Além disso,}} {{11|os usuários que deixarem o patinete em local inadequado}} devem ser multados, e {{10|a velocidade máxima deve ser menor nas ruas mais movimentadas}}.',
     '{{12|A tecnologia é bem-vinda, desde que a calçada continue sendo dos pedestres.}}',
     '{{1|Atenciosamente,}}',
     '{{1|Um morador do Centro}}'
@@ -113,7 +113,7 @@ CB.models['y-patinetes'] = {
     { n: 3, cat: 'papel', text: 'The writer is a downtown resident, and he uses that role as evidence: *na minha rua, vejo...* The prompt asks for what he observes day to day, and a first-person detail like the ramp at the corner is something only this writer can add.' },
     { n: 4, cat: 'lingua', text: 'The position comes in the first paragraph, in one sentence. *Desde que* (provided that) always takes the subjunctive: *desde que haja*, and at the end *desde que a calçada continue*. *Desde que tem regras* would be wrong twice: indicative and spoken *tem*.' },
     { n: 5, cat: 'coesao', text: '*É verdade que ... No entanto* is the concession pattern. The writer grants the other side (the service is practical) before answering it, which makes the position look fair and meets the checklist.' },
-    { n: 6, cat: 'fonte', text: 'Facts from the report in new words: the commute example, the 800 scooters six months ago, speeding among pedestrians, and the company\'s answer. The injury figures stay exact (46 people, 12 pedestrians) because numbers are the strongest proof, and they come without *segundo o texto*.' },
+    { n: 6, cat: 'fonte', text: 'Facts from the report in new words: the commute example, the 800 scooters six months ago, speeding among pedestrians, and the company\'s answer (guidance in the app and a 20 km/h cap). The injury figures stay exact (46 people, 12 pedestrians) because numbers are the strongest proof, and they come without *segundo o texto*.' },
     { n: 7, cat: 'registro', text: '*Passaram a servir de estacionamento* is the written way to say *viraram estacionamento*. And *mas* joins two clauses inside one sentence. Opening a new sentence with *Mas* is the spoken habit the genre guide warns against.' },
     { n: 8, cat: 'coesao', text: '*Por isso* turns the problem into a demand, then *Em primeiro lugar* and *Além disso* list the rules. The proposal paragraph reads as a numbered plan without looking like a list.' },
     { n: 9, cat: 'lingua', text: 'A regulation or a law is *aprovada*, never *passada*: *a prefeitura deve aprovar a regulamentação*. *Foi passado* is a calque of the English "was passed". *Regulamentação* is feminine, like every *-ção* noun.' },
@@ -122,7 +122,7 @@ CB.models['y-patinetes'] = {
     { n: 12, cat: 'genero', text: 'One sentence sums up the position before the closing, as the genre guide suggests. It echoes the thesis (keep the scooters, with conditions) in new words.' }
   ],
   why5: 'The letter is from a downtown resident to the paper that ran the report. It names the report in the first line and states a clear position right after it: keep the scooters, with rules. It grants the other side fairly (short trips, speed, the company\'s claim) and then answers it with the report\'s facts in new words (800 scooters, blocked sidewalks, speeding, 46 injured and 12 pedestrians) and one first-person observation that only this writer could make. It proposes concrete rules for the city and ends with a one-sentence summary before the closing. *É verdade que ... No entanto* handles the concession, and *Por isso*, *Em primeiro lugar* and *Além disso* organize the proposal. The register is formal and firm, with no sentence opening with *Mas*. The language models *desde que* + subjunctive, *aprovar* instead of the calque *passar*, the future subjunctive in *que deixarem* and feminine agreement in *comentá-la*.',
-  wordCount: 216
+  wordCount: 220
 };
 
 CB.models['z-trabalho-hibrido'] = {
@@ -171,7 +171,7 @@ CB.models['aa-festival-comida'] = {
     { n: 6, cat: 'lingua', text: 'Gender follows the noun you choose. *Trezentos queijos* is masculine, but *peça* is feminine, so the number and the pronoun change too: *trezentas peças*, *vendeu todas*. Check every number and adjective against its noun.' },
     { n: 7, cat: 'lingua', text: 'Regência and crase: *voltar a* + *a fazenda* = *voltar à fazenda*. The producer says *voltar na fazenda*, which is common in speech but marked as an error in writing.' },
     { n: 8, cat: 'coesao', text: '*Além disso* adds the hotels and restaurants to the producers\' story, and *Segundo ela* links the next fact back to the secretary quoted before it, so her name does not need repeating.' },
-    { n: 9, cat: 'genero', text: 'A direct quote with name, role and the verb *afirmou*, as the genre asks. The words are cleaned for print: *num* becomes *em um*, and *muito produtor vende* becomes *muitos produtores vendem*. A quote keeps the speaker\'s idea, not her spoken grammar.' },
+    { n: 9, cat: 'genero', text: 'A direct quote with name, role and the verb *afirmou*, as the genre asks. The words are cleaned for print: *num* becomes *em um*, which is more formal (*num* and *numa* are also accepted in writing), and *muito produtor vende* becomes *muitos produtores vendem*. A quote keeps the speaker\'s idea, not her spoken grammar.' },
     { n: 10, cat: 'registro', text: '*Há visitantes que* replaces the spoken *tem gente que*, and *já planejam voltar* replaces *já tá planejando voltar*. Reported speech lets the writer keep the idea and drop the spoken form.' },
     { n: 11, cat: 'fonte', text: 'The last paragraph is the *serviço*: next edition, probable new venue and how producers can register. It comes last because it is useful but not the main news. *Levá-la* is feminine because it refers to *a sexta edição*.' }
   ],
