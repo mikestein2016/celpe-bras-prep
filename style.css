@@ -1,4 +1,4 @@
-/* Light theme only, in the colors of the Brazilian flag */
+/* Light theme by default, in the colors of the Brazilian flag. Dark theme at the end of the file (switch in the top bar). */
 :root {
   color-scheme: light;
   --bg: #ffffff;
@@ -451,3 +451,57 @@ mark.fm { background: var(--good-soft); color: var(--good); font-weight: 600; pa
 .run-head .round-head .eyebrow { min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .run-head .round-head > :last-child { flex-shrink: 0; }
 .run-head .progress { margin-bottom: 0; }
+
+/* ---------- Dark theme (html[data-theme="dark"], set by the moon/sun switch in the top bar) ---------- */
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #0f141a;
+  --surface: #161d25;
+  --surface-2: #1d2630;
+  --ink: #e8edf2;
+  --ink-2: #b9c4cf;
+  --ink-3: #8a97a5;
+  --line: #2a3542;
+  --green: #2fbf62;
+  --green-dark: #3ccf74;
+  --yellow: #ffdf00;
+  --yellow-soft: #3a3410;
+  --blue: #7aa2ff;
+  --blue-soft: #1b2a4a;
+  --accent: #3ccf74;
+  --accent-ink: #0b1a10;
+  --accent-soft: #16301f;
+  --good: #4ade80;
+  --good-soft: #15301e;
+  --bad: #ff8a7a;
+  --bad-soft: #3a1d1a;
+  --paper: #1a2129;
+  --paper-line: #2a3542;
+  --c-genero: #8fb0ff;   --c-genero-bg: #1c2a48;
+  --c-papel: #c4a3ff;    --c-papel-bg: #2a2142;
+  --c-fonte: #4ade80;    --c-fonte-bg: #15301e;
+  --c-coesao: #f2c94c;   --c-coesao-bg: #3a3210;
+  --c-registro: #ff8fbd; --c-registro-bg: #3d1c2b;
+  --c-lingua: #5fd3df;   --c-lingua-bg: #12343a;
+  --shadow: 0 1px 2px rgba(0,0,0,.35), 0 4px 16px rgba(0,0,0,.35);
+}
+:root[data-theme="dark"] .topbar { background: rgba(15,20,26,.94); }
+:root[data-theme="dark"] .tray button.cur { color: #0f141a; }
+:root[data-theme="dark"] .chip.warn,
+:root[data-theme="dark"] .dw.acc { color: #ffe680; }
+:root[data-theme="dark"] .fixtext .fw.flag { box-shadow: inset 0 -2px 0 #b38f00; }
+:root[data-theme="dark"] ul.fchecks li { border-top-color: rgba(255,255,255,.08); }
+:root[data-theme="dark"] .sheet-inner { box-shadow: 0 -8px 30px rgba(0,0,0,.6); }
+.tb-theme { border: 0; background: transparent; cursor: pointer; font-size: 1.05rem; line-height: 1; padding: 7px 8px; border-radius: 999px; color: var(--ink-2); }
+.tb-theme:hover { background: var(--surface-2); }
+/* Text that sits ON the flag yellow keeps the dark ink in both themes. */
+:root[data-theme="dark"] .tb-nav a.on,
+:root[data-theme="dark"] .skeleton li::before { color: #0f1c2e; }
+/* Four tabs plus the switch must fit a 375 px phone without a sideways scroll. */
+@media (max-width: 420px) {
+  .tb-nav { gap: 0; }
+  .tb-nav a { padding: 7px 7px; font-size: .8rem; }
+  .tb-theme { padding: 6px 4px; font-size: .95rem; }
+  .tb-title { font-size: .92rem; }
+}
+@media (max-width: 360px) { .tb-title { display: none; } .topbar { grid-template-columns: 30px 1fr auto; } }

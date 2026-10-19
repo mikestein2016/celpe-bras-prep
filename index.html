@@ -10,6 +10,10 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;700;800&family=Source+Serif+4:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
+<script>
+/* Set the theme before the first paint, so a dark-mode user never sees a white flash. */
+try { if (localStorage.getItem('cbprep.theme') === 'dark') document.documentElement.setAttribute('data-theme', 'dark'); } catch (e) {}
+</script>
 </head>
 <body>
 <header class="topbar">
@@ -20,6 +24,7 @@
     <a href="#/guia" data-sec="guia">Guia</a>
     <a href="#/pratica" data-sec="pratica">Prática</a>
     <a href="#/treino" data-sec="treino">Treino</a>
+    <button class="tb-theme" id="tb-theme" type="button" aria-label="Modo escuro">🌙</button>
   </nav>
 </header>
 <main id="app"></main>

@@ -186,6 +186,7 @@
     else if (sec === 'pratica' && PROMPT[parts[1]]) html = viewPrompt(PROMPT[parts[1]]);
     else if (sec === 'treino' && !parts[1]) html = viewDrillHome();
     else if (sec === 'treino' && parts[1] === 'progresso') html = viewProgress();
+    else if (sec === 'treino' && parts[1] === 'semfim') html = viewEndless();
     else if (sec === 'treino' && (parts[1] === 'mix' || parts[1] === 'revisao' || MODES[parts[1]])) html = viewRound(parts[1]);
     else html = '<h1>Página não encontrada</h1><p><a href="#/">Voltar ao início</a></p>';
     if (html == null) return;
@@ -1280,6 +1281,8 @@
     var out = '<div class="eyebrow">Treino</div><h1>Drills</h1><p class="lede">Rounds of ' + ROUND_SIZE + '. Cards you miss come back later in the same round, and again in future rounds until they stick. </p><div class="card small box-legend"><b>How the bar fills.</b> Get a card right once and it counts. It comes back the next day, then in 3 days, then a week (the week box), then a month (the month box). Right in the month box and it stays there for good. A miss sends it back to the start, and a card left more than a week past its date slips back a box.<div class="legend-row">' + [1, 2, 3, 4, 5].map(function (b) { return '<span><i class="b' + b + '"></i>' + BOX_NAMES[b] + '</span>'; }).join('') + '</div></div>';
     var due = reviewIds().length;
     out += '<div class="modes"><a class="tile mode" href="#/treino/revisao"><div><div class="tile-title">Revisão do dia</div><div class="tile-sub">The cards that are due, and the ones you missed</div></div><div class="mode-stat">' + due + '<small>para hoje</small></div></a>';
+    var Es = st.endless, eTot = DRILLS.length, eDone = Es ? Object.keys(Es.done).length : 0, eMiss = Es ? Object.keys(Es.miss).length : 0;
+    out += '<a class="tile mode" href="#/treino/semfim"><div><div class="tile-title">Sem fim</div><div class="tile-sub">Every card once, no repeats. Then only the ones you missed, until they are all right.</div></div><div class="mode-stat">' + (eDone + eMiss) + '/' + eTot + '<small>' + (eMiss ? eMiss + ' para rever' : 'vistos') + '</small></div></a>';
     out += '<a class="tile mode" href="#/treino/ditado"><div><div class="tile-title">Ditado</div><div class="tile-sub">Hear a sentence, type it with every accent and ending</div></div><div class="mode-stat">' + ((st.dict && st.dict.n) ? Math.round(100 * st.dict.perfect / st.dict.n) + '%' : '–') + '<small>perfeitos</small></div></a>';
     if (GEN.formal) out += '<a class="tile mode" href="#/treino/formal"><div><div class="tile-title">Passe para o formal</div><div class="tile-sub">Rewrite what people say the way a formal text says it</div></div><div class="mode-stat">' + FORMAL.length + '<small>frases</small></div></a>';
     out += '<a class="tile mode mix" href="#/treino/surpresa"><div><div class="tile-title">Sessão surpresa</div><div class="tile-sub">Questions, corrections, a short text and cards from the whole Trilha</div></div><div class="mode-stat">' + (st.sessions || 0) + '<small>feitas</small></div></a>';
@@ -1544,6 +1547,71 @@
   }
 
   /* ---------- bind per view ---------- */
+  /* ---------- sem fim ----------
+     One endless stream over every card. The first lap shows each card once, in random order,
+     and a miss does NOT come back during that lap. After the lap only the misses come back,
+     until each one has been answered right. The Leitner boxes are still updated (gradeCard). */
+  function endless() {
+    var E = st.endless;
+    if (!E) E = st.endless = { lap: 1, done: {}, miss: {}, cur: null, prev: null, answered: false, given: null, orders: {}, n: 0, started: new Date().toISOString() };
+    return E;
+  }
+  function endlessPool() { return DRILLS.map(function (d) { return d.id; }); }
+  function endlessNext(E) {
+    var pool = endlessPool();
+    var fresh = pool.filter(function (id) { return !E.done[id] && !E.miss[id]; });
+    if (fresh.length) return fresh[Math.floor(Math.random() * fresh.length)];
+    var miss = Object.keys(E.miss).filter(function (id) { return DRILL[id]; });
+    if (!miss.length) return null;
+    // Avoid showing the card he just got wrong twice in a row when there is anything else.
+    var others = miss.filter(function (id) { return id !== E.prev; });
+    var from = others.length ? others : miss;
+    return from[Math.floor(Math.random() * from.length)];
+  }
+  function viewEndless() {
+    if (!DRILLS.length) return '<h1>No drills loaded</h1>';
+    var E = endless();
+    if (!E.cur || !DRILL[E.cur]) { E.cur = endlessNext(E); E.answered = false; E.given = null; save(); }
+    var total = endlessPool().length, done = Object.keys(E.done).length, miss = Object.keys(E.miss).length;
+    if (!E.cur) {
+      return '<div class="eyebrow">Sem fim</div><h1>Você passou por tudo</h1>' +
+        '<div class="card" style="text-align:center"><div class="score-big">' + total + '/' + total + '</div><div class="muted">cards answered right at least once · ' + E.n + ' answers</div></div>' +
+        '<div class="btn-row stretch"><button class="btn primary" id="endless-reset">Começar de novo</button><a class="btn" href="#/treino">Treino</a></div>';
+    }
+    var fresh = total - done - miss;
+    var head = fresh > 0
+      ? 'Primeira volta · ' + (total - fresh) + ' / ' + total
+      : 'Só os que errou · faltam ' + miss;
+    var pct = fresh > 0 ? Math.round(100 * (total - fresh) / total) : Math.round(100 * done / total);
+    var d = DRILL[E.cur];
+    // choiceCard/accentCard/feedback read a round object; this one never "ends", so the button says Próxima.
+    var V = { answered: E.answered, given: E.given, orders: E.orders, requeued: {}, i: 0, queue: [E.cur, E.cur] };
+    var out = '<div class="run-head"><div class="round-head"><div class="eyebrow" style="margin:0">Sem fim</div><span class="muted small">' + head + '</span></div>';
+    out += '<div class="progress"><i style="width:' + pct + '%"></i></div></div>';
+    if (fresh > 0 && miss) out += '<p class="muted small" style="margin:.2em 0 .6em">' + miss + ' para rever depois desta volta</p>';
+    out += '<div class="drill" id="drill">' + (d.mode === 'acento' ? accentCard(d, V) : choiceCard(d, V)) + '</div>';
+    out += '<div class="btn-row" style="justify-content:center"><a class="btn ghost small" href="#/treino">Sair</a></div>';
+    return out;
+  }
+  function bindEndless() {
+    var E = endless();
+    var reset = document.getElementById('endless-reset');
+    if (reset) { reset.onclick = function () { st.endless = null; accentWork = null; save(); route(); }; return; }
+    if (!E.cur) return;
+    var d = DRILL[E.cur], box = app.querySelector('#drill');
+    if (!box) return;
+    var next = document.getElementById('next');
+    if (next) next.onclick = function () { E.prev = E.cur; E.cur = null; E.answered = false; E.given = null; accentWork = null; save(); route(); };
+    var V = { answered: E.answered, given: E.given, orders: E.orders, requeued: {}, i: 0, queue: [E.cur, E.cur] };
+    bindCard(d, V, box, function (given) {
+      var ok = gradeCard(d, given);
+      E.answered = true; E.given = given; E.n++;
+      if (ok) { delete E.miss[d.id]; E.done[d.id] = 1; } else { E.miss[d.id] = 1; delete E.done[d.id]; }
+      save(); route();
+      var nx = document.getElementById('next'); if (nx) nx.focus();
+    });
+  }
+
   function bind(sec, parts) {
     if (!sec) bindPath();
     if (sec === 'trilha' && LESSON[parts[1]]) {
@@ -1555,6 +1623,7 @@
     if (sec === 'guia' && TASK[parts[1]]) bindSample(TASK[parts[1]].sample);
     if (sec === 'guia' && GENRE[parts[1]]) bindSample(GENRE[parts[1]].sample);
     if (sec === 'pratica' && PROMPT[parts[1]]) bindPrompt(PROMPT[parts[1]]);
+    if (sec === 'treino' && parts[1] === 'semfim') { bindEndless(); return; }
     if (sec === 'treino' && parts[1] === 'progresso') bindProgress();
     else if (sec === 'treino' && (parts[1] === 'mix' || parts[1] === 'revisao' || MODES[parts[1]])) {
       var R = st.round;
@@ -1563,6 +1632,25 @@
       else bindDrill(R);
     }
   }
+
+  /* ---------- dark mode switch ---------- */
+  (function themeSwitch() {
+    var btn = document.getElementById('tb-theme');
+    if (!btn) return;
+    var meta = document.querySelector('meta[name="theme-color"]');
+    function apply(dark) {
+      if (dark) document.documentElement.setAttribute('data-theme', 'dark'); else document.documentElement.removeAttribute('data-theme');
+      btn.textContent = dark ? '☀️' : '🌙';
+      btn.setAttribute('aria-label', dark ? 'Modo claro' : 'Modo escuro');
+      if (meta) meta.setAttribute('content', dark ? '#0f141a' : '#009c3b');
+    }
+    apply(document.documentElement.getAttribute('data-theme') === 'dark');
+    btn.onclick = function () {
+      var dark = document.documentElement.getAttribute('data-theme') !== 'dark';
+      try { localStorage.setItem('cbprep.theme', dark ? 'dark' : 'light'); } catch (e) { /* private mode */ }
+      apply(dark);
+    };
+  })();
 
   route();
 })();
